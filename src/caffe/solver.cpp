@@ -441,6 +441,7 @@ void Solver<Dtype>::Test(const int test_net_id) {
 #ifdef USE_MPI
     if (Caffe::parallel_mode() == Caffe::MPI) {
       SyncOutput(test_net);
+      iter_loss = SyncLoss(iter_loss);
     }
 #endif
     if (param_.test_compute_loss()) {
