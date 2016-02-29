@@ -59,7 +59,7 @@ def VideoSpatialPrediction(
     d = sio.loadmat(mean_file)
     image_mean = d['image_mean']
 
-    rgb = rgb[:,:,::-1,:] - np.tile(image_mean[...,np.newaxis], (1, 1, 1, rgb.shape[3]))
+    rgb = rgb[...] - np.tile(image_mean[...,np.newaxis], (1, 1, 1, rgb.shape[3]))
     rgb = np.transpose(rgb, (1,0,2,3))
 
     # test
