@@ -21,7 +21,7 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* scale_data = this->blobs_[0]->gpu_data();
   const Dtype* bias_data = this->blobs_[1]->gpu_data();
 
-  if (this->frozen_ || this->phase_ == TEST) {
+  if (this->phase_ == TEST) {
     const Dtype* running_mean_data = this->blobs_[2]->gpu_data();
     const Dtype* running_inv_variance_data = this->blobs_[3]->gpu_data();
     CUDNN_CHECK(cudnnBatchNormalizationForwardInference(handle_,
@@ -45,7 +45,7 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         bottom_desc_, bottom_data,
         top_desc_, top_data,
         bn_param_desc_, scale_data, bias_data,
-        this->bn_momentum_,
+        1 - this->bn_momentum_,
         running_mean_data, running_inv_variance_data,
         this->bn_eps_,
         save_mean_data, save_inv_variance_data));
@@ -63,18 +63,17 @@ void CuDNNBNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* scale_data = this->blobs_[0]->gpu_data();
     Dtype* scale_diff = scale_buf_.mutable_gpu_diff();
     Dtype* bias_diff = bias_buf_.mutable_gpu_diff();
-
-    const Dtype* save_mean_data = NULL;
-    const Dtype* save_inv_variance_data = NULL;
-    if (!this->frozen_) {
-      save_mean_data = save_mean_.gpu_data();
-      save_inv_variance_data = save_inv_variance_.gpu_data();
-    }
+    const Dtype* save_mean_data = save_mean_.gpu_data();
+    const Dtype* save_inv_variance_data = save_inv_variance_.gpu_data();
 
     CUDNN_CHECK(cudnnBatchNormalizationBackward(handle_,
         CUDNN_BATCHNORM_SPATIAL,
         cudnn::dataType<Dtype>::one,
         cudnn::dataType<Dtype>::zero,
+#if CUDNN_VERSION >= 4005
+        cudnn::dataType<Dtype>::one,
+        cudnn::dataType<Dtype>::one,
+#endif
         bottom_desc_, bottom_data,
         top_desc_, top_diff,
         bottom_desc_, bottom_diff,
@@ -83,15 +82,13 @@ void CuDNNBNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         this->bn_eps_,
         save_mean_data, save_inv_variance_data));
 
-    if (!this->frozen_) {
-      if (this->param_propagate_down_[0]) {
-        caffe_gpu_add(scale_buf_.count(), scale_diff,
-            this->blobs_[0]->gpu_diff(), this->blobs_[0]->mutable_gpu_diff());
-      }
-      if (this->param_propagate_down_[1]) {
-        caffe_gpu_add(bias_buf_.count(), bias_diff,
-            this->blobs_[1]->gpu_diff(), this->blobs_[1]->mutable_gpu_diff());
-      }
+    if (this->param_propagate_down_[0]) {
+      caffe_gpu_add(scale_buf_.count(), scale_diff,
+          this->blobs_[0]->gpu_diff(), this->blobs_[0]->mutable_gpu_diff());
+    }
+    if (this->param_propagate_down_[1]) {
+      caffe_gpu_add(bias_buf_.count(), bias_diff,
+          this->blobs_[1]->gpu_diff(), this->blobs_[1]->mutable_gpu_diff());
     }
   }
 }

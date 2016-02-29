@@ -21,7 +21,7 @@ void CuDNNBNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     LOG(WARNING) << "bn_eps is set to CUDNN_BN_MIN_EPSILON.";
     // Merely setting as CUDNN_BN_MIN_EPSILON fails the check due to
     // float / double precision problem.
-    this->bn_eps_ = CUDNN_BN_MIN_EPSILON * 1.001;
+    this->bn_eps_ = CUDNN_BN_MIN_EPSILON * 10;
   }
   scale_buf_.ReshapeLike(*(this->blobs_[0]));
   bias_buf_.ReshapeLike(*(this->blobs_[1]));
