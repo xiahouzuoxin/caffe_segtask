@@ -559,7 +559,8 @@ Dtype Net<Dtype>::ForwardFromTo(int start, int end) {
   }
 
 #ifdef USE_CUDNN
-  CuDNNConvolutionLayer<Dtype>::RuntimeOptimize(1000);
+  if (Caffe::mode() == Caffe::GPU)
+    CuDNNConvolutionLayer<Dtype>::RuntimeOptimize(1000);
 #endif
   return loss;
 }
@@ -806,7 +807,8 @@ void Net<Dtype>::Reshape() {
   }
 
 #ifdef USE_CUDNN
-  CuDNNConvolutionLayer<Dtype>::RuntimeOptimize(1000);
+  if (Caffe::mode() == Caffe::GPU)
+    CuDNNConvolutionLayer<Dtype>::RuntimeOptimize(1000);
 #endif
 }
 
