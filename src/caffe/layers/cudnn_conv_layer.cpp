@@ -449,6 +449,13 @@ CuDNNConvolutionLayer<Dtype>::~CuDNNConvolutionLayer() {
   workspaceData_bwd_data.empty();
   workspaceData_fwd.empty();
 
+  // unregister the layer perf
+  typename boost::unordered_map<CuDNNConvolutionLayer*, PerfReg*>::iterator
+          it = perf_reg.find(this);
+  if (it != perf_reg.end()){
+    perf_reg.erase(it);
+  }
+
   delete [] stream_;
   delete [] handle_;
   delete [] fwd_algo_;
