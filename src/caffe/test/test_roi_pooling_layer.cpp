@@ -4,6 +4,7 @@
 // Licensed under The MIT License [see fast-rcnn/LICENSE for details]
 // Written by Ross Girshick
 // ------------------------------------------------------------------
+#ifndef CPU_ONLY // ROIPooling only has GPU-based unit tests
 
 #include <cmath>
 #include <cstdlib>
@@ -101,3 +102,4 @@ TYPED_TEST(ROIPoolingLayerTest, TestGradient) {
 }
 
 }  // namespace caffe
+#endif
