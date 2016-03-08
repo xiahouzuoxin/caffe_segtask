@@ -899,6 +899,54 @@ private:
     int outer_dim_, bias_dim_, inner_dim_, dim_;
 };
 
+
+/**
+ * @brief Compute "reductions" -- operations that return a scalar output Blob
+ *        for an input Blob of arbitrary size, such as the sum, absolute sum,
+ *        and sum of squares.
+ *
+ * TODO(dox): thorough documentation for Forward, Backward, and proto params.
+ */
+template <typename Dtype>
+class BatchReductionLayer : public Layer<Dtype> {
+public:
+    explicit BatchReductionLayer(const LayerParameter& param)
+            : Layer<Dtype>(param) {}
+    virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+                            const vector<Blob<Dtype>*>& top);
+    virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+                         const vector<Blob<Dtype>*>& top);
+
+    virtual inline const char* type() const { return "BatchReduction"; }
+    virtual inline int ExactNumBottomBlobs() const { return 1; }
+    virtual inline int ExactNumTopBlobs() const { return 1; }
+
+protected:
+    virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+                             const vector<Blob<Dtype>*>& top);
+//    virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+//                             const vector<Blob<Dtype>*>& top);
+    virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+                              const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+//    virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+//                              const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+
+    /// @brief the reduction operation performed by the layer
+    ReductionParameter_ReductionOp op_;
+    /// @brief a scalar coefficient applied to all outputs
+    Dtype coeff_;
+    /// @brief the index of the first input axis to reduce
+    int axis_;
+    /// @brief the number of reductions performed
+    int num_;
+    /// @brief the step of reduction
+    int step_;
+    /// @brief a helper Blob used for summation (op_ == SUM)
+    Blob<Dtype> sum_multiplier_;
+    vector<int> levels_;
+    vector<int> ticks_;
+};
+
 }  // namespace caffe
 
 #endif  // CAFFE_COMMON_LAYERS_HPP_

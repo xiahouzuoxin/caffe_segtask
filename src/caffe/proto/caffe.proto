@@ -273,7 +273,7 @@ message ParamSpec {
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
-// LayerParameter next available layer-specific ID: 162 (last added: bias_param)
+// LayerParameter next available layer-specific ID: 163 (last added: batch_reduction_param)
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
@@ -360,6 +360,7 @@ message LayerParameter {
   optional ROIPoolingParameter roi_pooling_param = 150;
   optional ScaleParameter scale_param = 160;
   optional BiasParameter bias_param = 161;
+  optional BatchReductionParameter batch_reduction_param = 162;
 }
 
 // Message that stores parameters used to apply transformation
@@ -1271,4 +1272,9 @@ message BiasParameter {
   // Default is the zero (0) initialization, resulting in the BiasLayer
   // initially performing the identity operation.
   optional FillerParameter filler = 3;
+}
+
+message BatchReductionParameter {
+    repeated int32 level = 1;
+    optional ReductionParameter reduction_param = 2;
 }
