@@ -12,11 +12,6 @@ template <typename Dtype>
 void BatchReductionLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   op_ = this->layer_param_.batch_reduction_param().reduction_param().operation();
-}
-
-template <typename Dtype>
-void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top) {
   axis_ = bottom[0]->CanonicalAxisIndex(
       this->layer_param_.batch_reduction_param().reduction_param().axis());
 
@@ -28,20 +23,28 @@ void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   }
   levels_.reserve(this->layer_param_.batch_reduction_param().level_size());
 
-  int reduction_dim = 0;
   for (int i = 0; i < n_level; ++i){
     levels_.push_back(this->layer_param_.batch_reduction_param().level(i));
     ticks_.push_back(levels_.back() * levels_.back());
-    reduction_dim += ticks_.back();
   }
 
+}
+
+template <typename Dtype>
+void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top) {
+
   vector<int> top_shape(bottom[0]->shape().begin(),
-                        bottom[0]->shape().begin() + axis_ - 1);
+                        bottom[0]->shape().begin() + axis_);
 
   // if levels = [1], we do global reduction instead
   if ((levels_.size() != 1) || (levels_[0] != 1)){
     top_shape.push_back(levels_.size());
-    CHECK_EQ(reduction_dim, bottom[0]->shape(axis_));
+    int red_dim = 0;
+    for (int i = 0; i < ticks_.size(); ++i) red_dim += ticks_[i];
+    CHECK_EQ(red_dim, bottom[0]->shape(axis_));
+  }else{
+    ticks_[0] = bottom[0]->shape(axis_); // levels=[1] means we reduce along the whole axis
   }
 
   for (int i = axis_ + 1; i < bottom[0]->shape().size(); ++i){
@@ -52,6 +55,7 @@ void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   step_ = bottom[0]->count(axis_+1);
   num_ = bottom[0]->count(0, axis_);
 
+  //LOG_INFO<<num_<<" "<<step_;
   CHECK_EQ(step_ * num_ * levels_.size(), top[0]->count());
 
   // will add these later
@@ -67,20 +71,14 @@ void BatchReductionLayer<Dtype>::Forward_cpu(
   Dtype* top_data = top[0]->mutable_cpu_data();
   caffe_set(top[0]->count(), Dtype(0), top_data);
   for (int n = 0; n < num_; ++n){
+    //printf(" levels: %d\n", levels_.size());
     for (int l = 0; l < levels_.size(); ++l) {
       int tick = ticks_[l];
       Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1)/Dtype(tick) : Dtype(1);
       for (int t = 0; t < tick; ++t) {
-        for (int i = 0; i < step_; ++i) {
-          caffe_cpu_axpby(step_, coeff, bottom_data, Dtype(1), top_data);
-        }
-        //offset bottom_data each input step
+        caffe_cpu_axpby(step_, coeff, bottom_data, Dtype(1), top_data);
         bottom_data += step_;
       }
-      if (op_ == ReductionParameter_ReductionOp_MEAN){
-        caffe_scal(step_, Dtype(1)/Dtype(tick), top_data);
-      }
-      //offset bottom_data each output step
       top_data += step_;
     }
   }
@@ -99,9 +97,7 @@ void BatchReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
       int tick = ticks_[l];
       Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1)/Dtype(tick) : Dtype(1);
       for (int t = 0; t < tick; ++t) {
-        for (int i = 0; i < step_; ++i) {
-          caffe_cpu_axpby(step_, coeff, top_diff, Dtype(0), bottom_diff);
-        }
+        caffe_cpu_axpby(step_, coeff, top_diff, Dtype(0), bottom_diff);
         //offset bottom_data each input step
         bottom_diff += step_;
       }
