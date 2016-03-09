@@ -924,25 +924,23 @@ public:
 protected:
     virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
                              const vector<Blob<Dtype>*>& top);
-//    virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
-//                             const vector<Blob<Dtype>*>& top);
+    virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+                             const vector<Blob<Dtype>*>& top);
     virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
                               const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-//    virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
-//                              const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+    virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+                              const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
     /// @brief the reduction operation performed by the layer
     ReductionParameter_ReductionOp op_;
-    /// @brief a scalar coefficient applied to all outputs
-    Dtype coeff_;
     /// @brief the index of the first input axis to reduce
     int axis_;
     /// @brief the number of reductions performed
     int num_;
     /// @brief the step of reduction
     int step_;
-    /// @brief a helper Blob used for summation (op_ == SUM)
-    Blob<Dtype> sum_multiplier_;
+    /// @brief a helper Blob used for transferring ticks to GPU
+    Blob<Dtype> ticks_blob_;
     vector<int> levels_;
     vector<int> ticks_;
 };

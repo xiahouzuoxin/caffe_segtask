@@ -62,6 +62,12 @@ void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   if (op_ == ReductionParameter_ReductionOp_SUMSQ || op_ == ReductionParameter_ReductionOp_ASUM){
     NOT_IMPLEMENTED;
   }
+
+  ticks_blob_.Reshape(ticks_.size(), 1, 1, 1);
+  Dtype* tick_data = ticks_blob_.mutable_cpu_data();
+  for (int i = 0; i < levels_.size(); ++i){
+    tick_data[i] = ticks_[i];
+  }
 }
 
 template <typename Dtype>
