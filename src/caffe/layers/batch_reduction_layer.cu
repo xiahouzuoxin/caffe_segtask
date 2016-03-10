@@ -45,6 +45,7 @@ void BatchReductionLayer<Dtype>::Forward_gpu(
 
     const bool kForward = true; // forward
 
+    caffe_gpu_set(top[0]->count(), Dtype(0), top_data);
     //invoke kernel
     BatchReductionForwardKer<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
     <<<CAFFE_GET_BLOCKS(step_), CAFFE_CUDA_NUM_THREADS>>>(
