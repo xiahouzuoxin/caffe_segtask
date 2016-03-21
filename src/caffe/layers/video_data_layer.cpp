@@ -111,11 +111,18 @@ void VideoDataLayer<Dtype>::InternalThreadEntry(){
 		int average_duration = (int) lines_duration_[lines_id_] / num_segments;
 		for (int i = 0; i < num_segments; ++i){
 			if (this->phase_==TRAIN){
-				caffe::rng_t* frame_rng = static_cast<caffe::rng_t*>(frame_prefetch_rng_->generator());
-				int offset = (*frame_rng)() % (average_duration - new_length + 1);
-				offsets.push_back(offset+i*average_duration);
+				if (average_duration >= new_length){
+					caffe::rng_t* frame_rng = static_cast<caffe::rng_t*>(frame_prefetch_rng_->generator());
+					int offset = (*frame_rng)() % (average_duration - new_length + 1);
+					offsets.push_back(offset+i*average_duration);
+				} else {
+					offsets.push_back(1);
+				}
 			} else{
+				if (average_duration >= new_length)
 				offsets.push_back(int((average_duration-new_length+1)/2 + i*average_duration));
+				else
+				offsets.push_back(1);
 			}
 		}
 		if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_FLOW){
@@ -127,8 +134,9 @@ void VideoDataLayer<Dtype>::InternalThreadEntry(){
 				continue;
 			}
 		}
+
 		int offset1 = this->prefetch_data_.offset(item_id);
-    	this->transformed_data_.set_cpu_data(top_data + offset1);
+    	        this->transformed_data_.set_cpu_data(top_data + offset1);
 		this->data_transformer_->Transform(datum, &(this->transformed_data_));
 		top_label[item_id] = lines_[lines_id_].second;
 		//LOG()
