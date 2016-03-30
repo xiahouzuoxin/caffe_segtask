@@ -686,6 +686,13 @@ message VideoDataParameter{
     FLOW = 1;
   }
   optional Modality modality = 13 [default = FLOW];
+
+  // the name pattern for frame images,
+  // for RGB modality it is default to "img_%04d.jpg", for FLOW "flow_x_%04d" and "flow_y_%04d"
+  optional string name_pattern = 14;
+
+  // The type of input
+  optional bool encoded = 15 [default = false];
 }
 message InfogainLossParameter {
   // Specify the infogain matrix source.

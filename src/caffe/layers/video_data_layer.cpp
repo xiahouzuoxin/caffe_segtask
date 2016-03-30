@@ -50,6 +50,17 @@ void VideoDataLayer<Dtype>:: DataLayerSetUp(const vector<Blob<Dtype>*>& bottom, 
 	LOG(INFO) << "A total of " << lines_.size() << " videos.";
 	lines_id_ = 0;
 
+	//check name patter
+	if (this->layer_param_.video_data_param().name_pattern() == ""){
+		if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_RGB){
+			name_pattern_ = "image_%04d.jpg";
+		}else if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_FLOW){
+			name_pattern_ = "flow_%c_%04d.jpg";
+		}
+	}else{
+		name_pattern_ = this->layer_param_.video_data_param().name_pattern();
+	}
+
 	Datum datum;
 	const unsigned int frame_prefectch_rng_seed = caffe_rng_rand();
 	frame_prefetch_rng_.reset(new Caffe::RNG(frame_prefectch_rng_seed));
@@ -61,9 +72,11 @@ void VideoDataLayer<Dtype>:: DataLayerSetUp(const vector<Blob<Dtype>*>& bottom, 
 		offsets.push_back(offset+i*average_duration);
 	}
 	if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_FLOW)
-		CHECK(ReadSegmentFlowToDatum(lines_[lines_id_].first, lines_[lines_id_].second, offsets, new_height, new_width, new_length, &datum));
+		CHECK(ReadSegmentFlowToDatum(lines_[lines_id_].first, lines_[lines_id_].second,
+									 offsets, new_height, new_width, new_length, &datum, name_pattern_.c_str()));
 	else
-		CHECK(ReadSegmentRGBToDatum(lines_[lines_id_].first, lines_[lines_id_].second, offsets, new_height, new_width, new_length, &datum, true));
+		CHECK(ReadSegmentRGBToDatum(lines_[lines_id_].first, lines_[lines_id_].second,
+									offsets, new_height, new_width, new_length, &datum, true, name_pattern_.c_str()));
 	const int crop_size = this->layer_param_.transform_param().crop_size();
 	const int batch_size = this->layer_param_.video_data_param().batch_size();
 	if (crop_size > 0){
@@ -126,11 +139,13 @@ void VideoDataLayer<Dtype>::InternalThreadEntry(){
 			}
 		}
 		if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_FLOW){
-			if(!ReadSegmentFlowToDatum(lines_[lines_id_].first, lines_[lines_id_].second, offsets, new_height, new_width, new_length, &datum)) {
+			if(!ReadSegmentFlowToDatum(lines_[lines_id_].first, lines_[lines_id_].second,
+									   offsets, new_height, new_width, new_length, &datum, name_pattern_.c_str())) {
 				continue;
 			}
 		} else{
-			if(!ReadSegmentRGBToDatum(lines_[lines_id_].first, lines_[lines_id_].second, offsets, new_height, new_width, new_length, &datum, true)) {
+			if(!ReadSegmentRGBToDatum(lines_[lines_id_].first, lines_[lines_id_].second,
+									  offsets, new_height, new_width, new_length, &datum, true, name_pattern_.c_str())) {
 				continue;
 			}
 		}

@@ -304,7 +304,8 @@ void hdf5_save_nd_dataset<double>(
 }
 
 bool ReadSegmentRGBToDatum(const string& filename, const int label,
-    const vector<int> offsets, const int height, const int width, const int length, Datum* datum, bool is_color){
+    const vector<int> offsets, const int height, const int width, const int length, Datum* datum, bool is_color,
+    const char* name_pattern ){
 	cv::Mat cv_img;
 	string* datum_string;
 	char tmp[30];
@@ -313,7 +314,7 @@ bool ReadSegmentRGBToDatum(const string& filename, const int label,
 	for (int i = 0; i < offsets.size(); ++i){
 		int offset = offsets[i];
 		for (int file_id = 1; file_id < length+1; ++file_id){
-			sprintf(tmp,"image_%04d.jpg",int(file_id+offset));
+			sprintf(tmp, name_pattern, int(file_id+offset));
 			string filename_t = filename + "/" + tmp;
 			cv::Mat cv_img_origin = cv::imread(filename_t, cv_read_flag);
 			if (!cv_img_origin.data){
@@ -358,17 +359,18 @@ bool ReadSegmentRGBToDatum(const string& filename, const int label,
 }
 
 bool ReadSegmentFlowToDatum(const string& filename, const int label,
-    const vector<int> offsets, const int height, const int width, const int length, Datum* datum){
+    const vector<int> offsets, const int height, const int width, const int length, Datum* datum,
+    const char* name_pattern ){
 	cv::Mat cv_img_x, cv_img_y;
 	string* datum_string;
 	char tmp[30];
 	for (int i = 0; i < offsets.size(); ++i){
 		int offset = offsets[i];
 		for (int file_id = 1; file_id < length+1; ++file_id){
-			sprintf(tmp,"flow_x_%04d.jpg",int(file_id+offset));
+			sprintf(tmp,name_pattern, 'x', int(file_id+offset));
 			string filename_x = filename + "/" + tmp;
 			cv::Mat cv_img_origin_x = cv::imread(filename_x, CV_LOAD_IMAGE_GRAYSCALE);
-			sprintf(tmp,"flow_y_%04d.jpg",int(file_id+offset));
+			sprintf(tmp, name_pattern, 'y', int(file_id+offset));
 			string filename_y = filename + "/" + tmp;
 			cv::Mat cv_img_origin_y = cv::imread(filename_y, CV_LOAD_IMAGE_GRAYSCALE);
 			if (!cv_img_origin_x.data || !cv_img_origin_y.data){

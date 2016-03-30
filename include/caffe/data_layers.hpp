@@ -351,6 +351,7 @@ protected:
 	vector<std::pair<std::string, int> > lines_;
 	vector<int> lines_duration_;
 	int lines_id_;
+	string name_pattern_;
 };
 
 
