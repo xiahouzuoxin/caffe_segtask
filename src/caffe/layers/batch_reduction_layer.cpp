@@ -114,7 +114,7 @@ void BatchReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
 }
 
 #ifdef CPU_ONLY
-STUB_GPU(ReductionLayer);
+STUB_GPU(BatchReductionLayer);
 #endif
 
 INSTANTIATE_CLASS(BatchReductionLayer);
