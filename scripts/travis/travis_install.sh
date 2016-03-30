@@ -60,10 +60,13 @@ rm -f $LMDB_FILE
 
 # Install the Python runtime dependencies via miniconda (this is much faster
 # than using pip for everything).
-wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-chmod +x miniconda.sh
-./miniconda.sh -b -p /home/travis/miniconda
-export PATH=/home/travis/miniconda/bin:$PATH
+if [ ! -d "$HOME/miniconda" ]; then
+  # Control will enter here if $DIRECTORY exists.
+  wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  chmod +x miniconda.sh
+  ./miniconda.sh -b -p $HOME/miniconda
+fi
+export PATH="$HOME/miniconda/bin:$PATH"
 conda update --yes conda
 conda install --yes numpy scipy matplotlib scikit-image pip
 pip install protobuf
