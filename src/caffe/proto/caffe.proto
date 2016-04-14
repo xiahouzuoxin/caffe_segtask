@@ -803,6 +803,7 @@ message ReductionParameter {
     ASUM = 2;
     SUMSQ = 3;
     MEAN = 4;
+    TOPK = 5;  // top-k reduction output the average of the largest k elements
   }
 
   optional ReductionOp operation = 1 [default = SUM]; // reduction operation
@@ -823,6 +824,8 @@ message ReductionParameter {
   optional int32 axis = 2 [default = 0];
 
   optional float coeff = 3 [default = 1.0]; // coefficient for output
+
+  optional int32 k = 4 [default = 1]; // k for top k reduction (only used in batch reduction layer)
 }
 
 // Message that stores parameters used by ReLULayer

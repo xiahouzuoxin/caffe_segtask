@@ -28,6 +28,11 @@ void BatchReductionLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     ticks_.push_back(levels_.back() * levels_.back());
   }
 
+  // top-k reduction currently only works with single level
+  if (op_ == ReductionParameter_ReductionOp_TOPK){
+    CHECK(n_level <= 1)<<"For now top-k reduction only works with 1 level";
+  }
+
 }
 
 template <typename Dtype>
@@ -68,6 +73,18 @@ void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   for (int i = 0; i < levels_.size(); ++i){
     tick_data[i] = ticks_[i];
   }
+
+  // reshape idx blob in top-k case
+  if (op_ == ReductionParameter_ReductionOp_TOPK){
+    argsort_idx_.Reshape(bottom[0]->shape());
+  }else{
+    argsort_idx_.Reshape(1,1,1,1);
+  }
+}
+
+template <typename Dtype>
+bool comparator( const std::pair<Dtype, int>& left, const std::pair<Dtype, int>& right){
+  return left.first >= right.first; // use descending order here
 }
 
 template <typename Dtype>
@@ -75,17 +92,57 @@ void BatchReductionLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
+  Dtype* idx_data = argsort_idx_.mutable_cpu_data();
+
   caffe_set(top[0]->count(), Dtype(0), top_data);
-  for (int n = 0; n < num_; ++n){
-    //printf(" levels: %d\n", levels_.size());
-    for (int l = 0; l < levels_.size(); ++l) {
-      int tick = ticks_[l];
-      Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1)/Dtype(tick) : Dtype(1);
-      for (int t = 0; t < tick; ++t) {
-        caffe_cpu_axpby(step_, coeff, bottom_data, Dtype(1), top_data);
-        bottom_data += step_;
+  if (op_ != ReductionParameter_ReductionOp_TOPK) {
+    for (int n = 0; n < num_; ++n) {
+      //printf(" levels: %d\n", levels_.size());
+      for (int l = 0; l < levels_.size(); ++l) {
+        int tick = ticks_[l];
+        Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1) / Dtype(tick) : Dtype(1);
+        for (int t = 0; t < tick; ++t) {
+          caffe_cpu_axpby(step_, coeff, bottom_data, Dtype(1), top_data);
+          bottom_data += step_;
+        }
+        top_data += step_;
+      }
+    }
+  }else {
+    int k = this->layer_param_.batch_reduction_param().reduction_param().k();
+    int tick = ticks_[0];
+
+    vector<std::pair<Dtype, int> > buffer;
+    buffer.resize(tick);
+
+
+    // num_ outer loops
+    caffe_set(top[0]->count(), Dtype(0), top_data);
+    caffe_set(bottom[0]->count(), Dtype(0), idx_data);
+    for (int n = 0; n < num_; ++n) {
+      // step_ inner loops
+      for (int i = 0; i < step_; ++i) {
+        //fill data
+        for (int t = 0; t < tick; ++t){
+          buffer[t] = std::make_pair(bottom_data[t * step_ + i], t);
+        }
+
+        // perform sort
+        std::sort(buffer.begin(), buffer.end(), comparator<Dtype>);
+
+        // obtain output and index
+        Dtype accum = 0;
+        for (int k_out = 0; i < k; ++k){
+          std::pair<Dtype, int>& p = buffer[k_out];
+          accum += p.first;
+          idx_data[p.second*step_ + i] = k_out+1;
+        }
+        // set top data
+        top_data[i] = accum / Dtype(k);
       }
       top_data += step_;
+      bottom_data += tick*step_;
+      idx_data += tick*step_;
     }
   }
 
@@ -98,17 +155,40 @@ void BatchReductionLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
   // Get bottom_data, if needed.
   const Dtype* top_diff = top[0]->cpu_diff();
   Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
-  for (int i = 0; i < num_; ++i) {
-    for (int l = 0; l < levels_.size(); ++l) {
-      int tick = ticks_[l];
-      Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1)/Dtype(tick) : Dtype(1);
-      for (int t = 0; t < tick; ++t) {
-        caffe_cpu_axpby(step_, coeff, top_diff, Dtype(0), bottom_diff);
-        //offset bottom_data each input step
-        bottom_diff += step_;
+  Dtype* idx_data = argsort_idx_.mutable_cpu_data();
+
+  if (op_ != ReductionParameter_ReductionOp_TOPK) {
+    for (int i = 0; i < num_; ++i) {
+      for (int l = 0; l < levels_.size(); ++l) {
+        int tick = ticks_[l];
+        Dtype coeff = (op_ == ReductionParameter_ReductionOp_MEAN) ? Dtype(1) / Dtype(tick) : Dtype(1);
+        for (int t = 0; t < tick; ++t) {
+          caffe_cpu_axpby(step_, coeff, top_diff, Dtype(0), bottom_diff);
+          //offset bottom_data each input step
+          bottom_diff += step_;
+        }
+        //offset bottom_data each output step
+        top_diff += step_;
       }
-      //offset bottom_data each output step
+    }
+  }else {
+    int tick = ticks_[0];
+    int k = this->layer_param_.batch_reduction_param().reduction_param().k();
+
+    // num_ outer loops
+    for (int n = 0; n < num_; ++n) {
+      // step_ inner loops
+      for (int i = 0; i < step_; ++i) {
+        //fill data
+        Dtype diff = top_diff[i] / Dtype(k);
+        for (int t = 0; t < tick; ++t){
+          bottom_diff[t * step_ + i] = (idx_data[t * step_ + i] >= 1)?diff:0;
+        }
+
+      }
       top_diff += step_;
+      bottom_diff += tick*step_;
+      idx_data += tick*step_;
     }
   }
 }

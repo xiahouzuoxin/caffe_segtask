@@ -943,6 +943,8 @@ protected:
     Blob<Dtype> ticks_blob_;
     vector<int> levels_;
     vector<int> ticks_;
+
+    Blob<Dtype> argsort_idx_;
 };
 
 }  // namespace caffe
