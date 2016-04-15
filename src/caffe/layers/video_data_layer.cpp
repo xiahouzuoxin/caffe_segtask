@@ -129,13 +129,13 @@ void VideoDataLayer<Dtype>::InternalThreadEntry(){
 					int offset = (*frame_rng)() % (average_duration - new_length + 1);
 					offsets.push_back(offset+i*average_duration);
 				} else {
-					offsets.push_back(1);
+					offsets.push_back(0);
 				}
 			} else{
 				if (average_duration >= new_length)
 				offsets.push_back(int((average_duration-new_length+1)/2 + i*average_duration));
 				else
-				offsets.push_back(1);
+				offsets.push_back(0);
 			}
 		}
 		if (this->layer_param_.video_data_param().modality() == VideoDataParameter_Modality_FLOW){
