@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <vector>
+#include <caffe/caffe.hpp>
 
 #include "caffe/layer.hpp"
 #include "caffe/util/math_functions.hpp"
@@ -90,11 +91,14 @@ bool comparator( const std::pair<Dtype, int>& left, const std::pair<Dtype, int>&
 template <typename Dtype>
 void BatchReductionLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+
   const Dtype* bottom_data = bottom[0]->cpu_data();
   Dtype* top_data = top[0]->mutable_cpu_data();
   Dtype* idx_data = argsort_idx_.mutable_cpu_data();
 
+
   caffe_set(top[0]->count(), Dtype(0), top_data);
+
   if (op_ != ReductionParameter_ReductionOp_TOPK) {
     for (int n = 0; n < num_; ++n) {
       //printf(" levels: %d\n", levels_.size());
@@ -126,13 +130,12 @@ void BatchReductionLayer<Dtype>::Forward_cpu(
         for (int t = 0; t < tick; ++t){
           buffer[t] = std::make_pair(bottom_data[t * step_ + i], t);
         }
-
         // perform sort
         std::sort(buffer.begin(), buffer.end(), comparator<Dtype>);
 
         // obtain output and index
         Dtype accum = 0;
-        for (int k_out = 0; i < k; ++k){
+        for (int k_out = 0; k_out < k; ++k_out){
           std::pair<Dtype, int>& p = buffer[k_out];
           accum += p.first;
           idx_data[p.second*step_ + i] = k_out+1;
@@ -143,8 +146,12 @@ void BatchReductionLayer<Dtype>::Forward_cpu(
       top_data += step_;
       bottom_data += tick*step_;
       idx_data += tick*step_;
+
     }
+
+
   }
+
 
 }
 
