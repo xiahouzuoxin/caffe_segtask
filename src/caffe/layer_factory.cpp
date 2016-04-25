@@ -168,11 +168,8 @@ shared_ptr<Layer<Dtype> > GetBNLayer(const LayerParameter& param) {
   if (engine == BNParameter_Engine_DEFAULT) {
     engine = BNParameter_Engine_CAFFE;
 #if defined(USE_CUDNN)
-#if CUDNN_VERSION_MIN(4, 0, 0)
-    // TODO : Currently we use caffe as the default engine, due to the performance issues with NV's implementation.
-    // Will switch back when this get fixed.
-
-    // engine = BNParameter_Engine_CUDNN;
+#if CUDNN_VERSION_MIN(5, 0, 0)
+     engine = BNParameter_Engine_CUDNN;
 #endif
 #endif
   }

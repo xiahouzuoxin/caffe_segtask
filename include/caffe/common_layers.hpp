@@ -735,7 +735,7 @@ class BNLayer : public Layer<Dtype> {
 
 
 #if defined(USE_CUDNN) 
-#if CUDNN_VERSION_MIN(4, 0, 0)
+#if CUDNN_VERSION_MIN(5, 0, 0)
 /**
  * @brief cuDNN implementation of BNLayer.
  *        Fallback to BNLayer for CPU mode.

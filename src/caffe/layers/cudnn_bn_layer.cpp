@@ -9,7 +9,7 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/vision_layers.hpp"
 
-#if CUDNN_VERSION_MIN(4, 0, 0)
+#if CUDNN_VERSION_MIN(5, 0, 0)
 
 namespace caffe {
 
