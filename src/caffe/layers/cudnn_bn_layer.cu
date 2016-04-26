@@ -23,7 +23,7 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
   const double epsilon = max(this->bn_eps_, CUDNN_BN_MIN_EPSILON);
 
-  if (this->phase_ == TEST) {
+  if (this->phase_ == TEST || this->frozen_) {
     const Dtype* running_mean_data = this->blobs_[2]->gpu_data();
     const Dtype* running_variance_data = this->blobs_[3]->gpu_data();
     CUDNN_CHECK(cudnnBatchNormalizationForwardInference(handle_,
@@ -35,6 +35,19 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         bn_param_desc_, scale_data, bias_data,
         running_mean_data, running_variance_data,
         epsilon));
+
+    if (this->frozen_ && this->phase_ != TEST){
+        // copy running mean
+        caffe_copy(this->blobs_[2]->count(), running_mean_data, save_mean_.mutable_gpu_data());
+        // copy running variance to inv variance
+        caffe_copy(this->blobs_[3]->count(), running_variance_data, save_inv_variance_.mutable_gpu_data());
+        // Add eps
+        caffe_gpu_add_scalar(save_inv_variance_.count(), (Dtype)epsilon,
+            save_inv_variance_.mutable_gpu_data());
+        // Inverse standard deviation
+        caffe_gpu_powx(save_inv_variance_.count(), save_inv_variance_.gpu_data(),
+            Dtype(-0.5), save_inv_variance_.mutable_gpu_data());
+    }
   } else {
     Dtype* running_mean_data = this->blobs_[2]->mutable_gpu_data();
     Dtype* running_variance_data = this->blobs_[3]->mutable_gpu_data();
@@ -83,6 +96,7 @@ void CuDNNBNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         scale_diff, bias_diff,
         epsilon,
         save_mean_data, save_inv_variance_data));
+
   }
 }
 
