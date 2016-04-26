@@ -37,7 +37,7 @@ void BNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
         this->blobs_[2]->mutable_cpu_data());
     // moving average variance
     this->blobs_[3].reset(new Blob<Dtype>(shape));
-    caffe_set(this->blobs_[3]->count(), Dtype(1),
+    caffe_set(this->blobs_[3]->count(), frozen_ ? Dtype(1) : Dtype(0),
         this->blobs_[3]->mutable_cpu_data());
   }
   this->param_propagate_down_.resize(this->blobs_.size(), true);

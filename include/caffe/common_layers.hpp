@@ -767,8 +767,6 @@ class CuDNNBNLayer : public BNLayer<Dtype> {
   cudnnTensorDescriptor_t top_desc_;
   cudnnTensorDescriptor_t bn_param_desc_;
 
-  Blob<Dtype> scale_buf_;
-  Blob<Dtype> bias_buf_;
   Blob<Dtype> save_mean_;
   Blob<Dtype> save_inv_variance_;
 };
