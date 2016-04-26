@@ -133,6 +133,10 @@ void BNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       // Use the moving average variance
       caffe_copy(batch_statistic_.count(), this->blobs_[3]->gpu_data(),
           batch_statistic_.mutable_gpu_data());
+      caffe_gpu_add_scalar(batch_statistic_.count(), bn_eps_,
+          batch_statistic_.mutable_gpu_data());
+      caffe_gpu_powx(batch_statistic_.count(), batch_statistic_.gpu_data(),
+          Dtype(-0.5), batch_statistic_.mutable_gpu_data());
       // Multiple slope with inverse std
       caffe_gpu_mul(batch_statistic_.count(), this->blobs_[0]->gpu_data(),
           batch_statistic_.gpu_data(), batch_statistic_.mutable_gpu_data());

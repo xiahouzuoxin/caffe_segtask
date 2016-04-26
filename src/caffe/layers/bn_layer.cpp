@@ -213,10 +213,14 @@ void BNLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     if (propagate_down[0]) {
       const Dtype* const_top_diff = top[0]->cpu_diff();
       Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
-      // Use the moving average inverse std
+      // Use the moving average variance
       caffe_copy(batch_statistic_.count(), this->blobs_[3]->cpu_data(),
           batch_statistic_.mutable_cpu_data());
-      // Multiple slope with inverse std
+      caffe_add_scalar(batch_statistic_.count(), bn_eps_,
+          batch_statistic_.mutable_cpu_data());
+      caffe_powx(batch_statistic_.count(), batch_statistic_.cpu_data(),
+          Dtype(-0.5), batch_statistic_.mutable_cpu_data());
+      // Divide slope with std
       caffe_mul(batch_statistic_.count(), this->blobs_[0]->cpu_data(),
           batch_statistic_.cpu_data(), batch_statistic_.mutable_cpu_data());
       // Broadcast
