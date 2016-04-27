@@ -10,7 +10,7 @@ import caffe
 def main(args):
     net = caffe.Net(args.model, args.weights, caffe.TEST)
     conversion = args.conversion
-    eps = 1e-5
+    eps = args.epsilon
     for name, param in net.params.iteritems():
         if name.endswith('_bn'):
             if conversion == 'var_to_inv_std':
@@ -34,7 +34,9 @@ if __name__ == '__main__':
     parser.add_argument('model', help="The deploy prototxt")
     parser.add_argument('weights', help="The caffemodel")
     parser.add_argument('--output', '-o', help="Output caffemodel")
-    parser.add_argument('--conversion', type=str, default="std_to_inv_std",
+    parser.add_argument('--conversion', type=str, default="inv_std_to_var",
                         help='can be "var_to_inv_std" or "inv_std_to_var"')
+    parser.add_argument('--epsilon', type=float, default=1e-5,
+                        help='the epsilon in the inverse, default to 1e-5')
     args = parser.parse_args()
     main(args)
