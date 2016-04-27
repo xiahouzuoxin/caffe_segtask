@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(
         description="This script converts between two styles of BN models. "
                     "Specifically, in history we have two version of BN implementation, one storing running variance"
-                    "the other storing running inverse variance.")
+                    "the other storing running inverse std.")
     parser.add_argument('model', help="The deploy prototxt")
     parser.add_argument('weights', help="The caffemodel")
     parser.add_argument('--output', '-o', help="Output caffemodel")
