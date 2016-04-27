@@ -9,7 +9,7 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/vision_layers.hpp"
 
-#if CUDNN_VERSION_MIN(4, 0, 0)
+#if CUDNN_VERSION_MIN(5, 0, 0)
 
 namespace caffe {
 
@@ -17,14 +17,6 @@ template <typename Dtype>
 void CuDNNBNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   BNLayer<Dtype>::LayerSetUp(bottom, top);
-  if (this->bn_eps_ < CUDNN_BN_MIN_EPSILON) {
-    LOG(WARNING) << "bn_eps is set to CUDNN_BN_MIN_EPSILON.";
-    // Merely setting as CUDNN_BN_MIN_EPSILON fails the check due to
-    // float / double precision problem.
-    this->bn_eps_ = CUDNN_BN_MIN_EPSILON * 10;
-  }
-  scale_buf_.ReshapeLike(*(this->blobs_[0]));
-  bias_buf_.ReshapeLike(*(this->blobs_[1]));
   save_mean_.ReshapeLike(*(this->blobs_[2]));
   save_inv_variance_.ReshapeLike(*(this->blobs_[3]));
 

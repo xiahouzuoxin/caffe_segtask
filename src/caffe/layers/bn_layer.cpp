@@ -37,10 +37,31 @@ void BNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
         this->blobs_[2]->mutable_cpu_data());
     // moving average variance
     this->blobs_[3].reset(new Blob<Dtype>(shape));
-    caffe_set(this->blobs_[3]->count(), Dtype(1),
+    caffe_set(this->blobs_[3]->count(), frozen_ ? Dtype(1) : Dtype(0),
         this->blobs_[3]->mutable_cpu_data());
   }
   this->param_propagate_down_.resize(this->blobs_.size(), true);
+
+  // runing average stats does not use weight decay and learning rate
+  while (this->layer_param_.param_size() < 4){
+    this->layer_param_.mutable_param()->Add();
+  }
+  this->layer_param_.mutable_param(2)->set_lr_mult(Dtype(0));
+  this->layer_param_.mutable_param(2)->set_decay_mult(Dtype(0));
+
+  this->layer_param_.mutable_param(3)->set_lr_mult(Dtype(0));
+  this->layer_param_.mutable_param(3)->set_decay_mult(Dtype(0));
+
+  // shutdown scale and bias update in frozen mode
+  if (this->frozen_){
+    // slope
+    this->layer_param_.mutable_param(0)->set_lr_mult(Dtype(0));
+    this->layer_param_.mutable_param(0)->set_decay_mult(Dtype(0));
+
+    // bias
+    this->layer_param_.mutable_param(1)->set_lr_mult(Dtype(0));
+    this->layer_param_.mutable_param(1)->set_decay_mult(Dtype(0));
+  }
 }
 
 template <typename Dtype>
@@ -118,6 +139,7 @@ void BNLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     caffe_copy(batch_statistic_.count(), this->blobs_[3]->cpu_data(),
         batch_statistic_.mutable_cpu_data());
   } else {
+    // calculate batch variance
     caffe_powx(broadcast_buffer_.count(), const_top_data, Dtype(2),
         broadcast_buffer_.mutable_cpu_data());
     caffe_cpu_gemv<Dtype>(CblasNoTrans, num_ * channels_, height_ * width_,
@@ -127,19 +149,20 @@ void BNLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     caffe_cpu_gemv<Dtype>(CblasTrans, num_, channels_, Dtype(1) / num_,
         spatial_statistic_.cpu_data(), batch_sum_multiplier_.cpu_data(),
         Dtype(0), batch_statistic_.mutable_cpu_data());
-    // Add eps
-    caffe_add_scalar(batch_statistic_.count(), bn_eps_,
-        batch_statistic_.mutable_cpu_data());
-    // Inverse standard deviation
-    caffe_powx(batch_statistic_.count(), batch_statistic_.cpu_data(),
-        Dtype(-0.5), batch_statistic_.mutable_cpu_data());
+
     // Add to the moving average
-    if (!frozen_) {
-      caffe_cpu_axpby(batch_statistic_.count(),
-          Dtype(1) - bn_momentum_, batch_statistic_.cpu_data(),
-          bn_momentum_, this->blobs_[3]->mutable_cpu_data());
-    }
+    caffe_cpu_axpby(batch_statistic_.count(),
+        Dtype(1) - bn_momentum_, batch_statistic_.cpu_data(),
+        bn_momentum_, this->blobs_[3]->mutable_cpu_data());
   }
+
+  // Add eps
+  caffe_add_scalar(batch_statistic_.count(), bn_eps_,
+                   batch_statistic_.mutable_cpu_data());
+  // Inverse standard deviation
+  caffe_powx(batch_statistic_.count(), batch_statistic_.cpu_data(),
+             Dtype(-0.5), batch_statistic_.mutable_cpu_data());
+
   // Broadcast the inverse std
   caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, num_, channels_, 1,
         Dtype(1), batch_sum_multiplier_.cpu_data(), batch_statistic_.cpu_data(),
@@ -190,10 +213,14 @@ void BNLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     if (propagate_down[0]) {
       const Dtype* const_top_diff = top[0]->cpu_diff();
       Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
-      // Use the moving average inverse std
+      // Use the moving average variance
       caffe_copy(batch_statistic_.count(), this->blobs_[3]->cpu_data(),
           batch_statistic_.mutable_cpu_data());
-      // Multiple slope with inverse std
+      caffe_add_scalar(batch_statistic_.count(), bn_eps_,
+          batch_statistic_.mutable_cpu_data());
+      caffe_powx(batch_statistic_.count(), batch_statistic_.cpu_data(),
+          Dtype(-0.5), batch_statistic_.mutable_cpu_data());
+      // Divide slope with std
       caffe_mul(batch_statistic_.count(), this->blobs_[0]->cpu_data(),
           batch_statistic_.cpu_data(), batch_statistic_.mutable_cpu_data());
       // Broadcast

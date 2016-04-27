@@ -9,7 +9,7 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/vision_layers.hpp"
 
-#if CUDNN_VERSION_MIN(4, 0, 0)
+#if CUDNN_VERSION_MIN(5, 0, 0)
 
 namespace caffe {
 
@@ -21,9 +21,11 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* scale_data = this->blobs_[0]->gpu_data();
   const Dtype* bias_data = this->blobs_[1]->gpu_data();
 
-  if (this->phase_ == TEST) {
+  const double epsilon = max(this->bn_eps_, CUDNN_BN_MIN_EPSILON);
+
+  if (this->phase_ == TEST || this->frozen_) {
     const Dtype* running_mean_data = this->blobs_[2]->gpu_data();
-    const Dtype* running_inv_variance_data = this->blobs_[3]->gpu_data();
+    const Dtype* running_variance_data = this->blobs_[3]->gpu_data();
     CUDNN_CHECK(cudnnBatchNormalizationForwardInference(handle_,
         CUDNN_BATCHNORM_SPATIAL,
         cudnn::dataType<Dtype>::one,
@@ -31,11 +33,24 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         bottom_desc_, bottom_data,
         top_desc_, top_data,
         bn_param_desc_, scale_data, bias_data,
-        running_mean_data, running_inv_variance_data,
-        this->bn_eps_));
+        running_mean_data, running_variance_data,
+        epsilon));
+
+    if (this->frozen_ && this->phase_ != TEST){
+        // copy running mean
+        caffe_copy(this->blobs_[2]->count(), running_mean_data, save_mean_.mutable_gpu_data());
+        // copy running variance to inv variance
+        caffe_copy(this->blobs_[3]->count(), running_variance_data, save_inv_variance_.mutable_gpu_data());
+        // Add eps
+        caffe_gpu_add_scalar(save_inv_variance_.count(), (Dtype)epsilon,
+            save_inv_variance_.mutable_gpu_data());
+        // Inverse standard deviation
+        caffe_gpu_powx(save_inv_variance_.count(), save_inv_variance_.gpu_data(),
+            Dtype(-0.5), save_inv_variance_.mutable_gpu_data());
+    }
   } else {
     Dtype* running_mean_data = this->blobs_[2]->mutable_gpu_data();
-    Dtype* running_inv_variance_data = this->blobs_[3]->mutable_gpu_data();
+    Dtype* running_variance_data = this->blobs_[3]->mutable_gpu_data();
     Dtype* save_mean_data = save_mean_.mutable_gpu_data();
     Dtype* save_inv_variance_data = save_inv_variance_.mutable_gpu_data();
     CUDNN_CHECK(cudnnBatchNormalizationForwardTraining(handle_,
@@ -46,8 +61,8 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         top_desc_, top_data,
         bn_param_desc_, scale_data, bias_data,
         1 - this->bn_momentum_,
-        running_mean_data, running_inv_variance_data,
-        this->bn_eps_,
+        running_mean_data, running_variance_data,
+        epsilon,
         save_mean_data, save_inv_variance_data));
   }
 }
@@ -61,35 +76,27 @@ void CuDNNBNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* bottom_data = bottom[0]->gpu_data();
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const Dtype* scale_data = this->blobs_[0]->gpu_data();
-    Dtype* scale_diff = scale_buf_.mutable_gpu_diff();
-    Dtype* bias_diff = bias_buf_.mutable_gpu_diff();
+    Dtype* scale_diff = this->blobs_[0]->mutable_gpu_diff();
+    Dtype* bias_diff = this->blobs_[1]->mutable_gpu_diff();
     const Dtype* save_mean_data = save_mean_.gpu_data();
     const Dtype* save_inv_variance_data = save_inv_variance_.gpu_data();
+
+    const double epsilon = max(this->bn_eps_, CUDNN_BN_MIN_EPSILON);
 
     CUDNN_CHECK(cudnnBatchNormalizationBackward(handle_,
         CUDNN_BATCHNORM_SPATIAL,
         cudnn::dataType<Dtype>::one,
         cudnn::dataType<Dtype>::zero,
-#if CUDNN_VERSION >= 4005
         cudnn::dataType<Dtype>::one,
         cudnn::dataType<Dtype>::one,
-#endif
         bottom_desc_, bottom_data,
         top_desc_, top_diff,
         bottom_desc_, bottom_diff,
         bn_param_desc_, scale_data,
         scale_diff, bias_diff,
-        this->bn_eps_,
+        epsilon,
         save_mean_data, save_inv_variance_data));
 
-    if (this->param_propagate_down_[0]) {
-      caffe_gpu_add(scale_buf_.count(), scale_diff,
-          this->blobs_[0]->gpu_diff(), this->blobs_[0]->mutable_gpu_diff());
-    }
-    if (this->param_propagate_down_[1]) {
-      caffe_gpu_add(bias_buf_.count(), bias_diff,
-          this->blobs_[1]->gpu_diff(), this->blobs_[1]->mutable_gpu_diff());
-    }
   }
 }
 
