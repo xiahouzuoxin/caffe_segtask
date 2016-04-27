@@ -13,11 +13,11 @@ def main(args):
     eps = 1e-5
     for name, param in net.params.iteritems():
         if name.endswith('_bn'):
-            if conversion == 'std_to_inv_std':
+            if conversion == 'var_to_inv_std':
                 var = param[3].data
                 inv_std = 1. / np.sqrt(var + eps)
                 param[3].data[...] = inv_std
-            elif conversion == 'inv_std_to_std':
+            elif conversion == 'inv_std_to_var':
                 inv_std = param[3].data
                 var = np.power(inv_std, -2) - eps
                 param[3].data[...] = var
@@ -35,6 +35,6 @@ if __name__ == '__main__':
     parser.add_argument('weights', help="The caffemodel")
     parser.add_argument('--output', '-o', help="Output caffemodel")
     parser.add_argument('--conversion', type=str, default="std_to_inv_std",
-                        help='can be "std_to_inv_std" or "inv_std_to_std"')
+                        help='can be "var_to_inv_std" or "inv_std_to_var"')
     args = parser.parse_args()
     main(args)
