@@ -1,0 +1,40 @@
+import numpy as np
+import sys
+import os
+import os.path as osp
+from argparse import ArgumentParser
+
+import caffe
+
+
+def main(args):
+    net = caffe.Net(args.model, args.weights, caffe.TEST)
+    conversion = args.conversion
+    eps = 1e-5
+    for name, param in net.params.iteritems():
+        if name.endswith('_bn'):
+            if conversion == 'std_to_inv_std':
+                var = param[3].data
+                inv_std = 1. / np.sqrt(var + eps)
+                param[3].data[...] = inv_std
+            elif conversion == 'inv_std_to_std':
+                inv_std = param[3].data
+                var = np.power(inv_std, -2) - eps
+                param[3].data[...] = var
+            else:
+                raise ValueError("Unknown conversion type {}".format(conversion))
+    net.save(args.output)
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser(
+        description="This script converts between two styles of BN models. "
+                    "Specifically, in history we have two version of BN implementation, one storing running variance"
+                    "the other storing running inverse variance.")
+    parser.add_argument('model', help="The deploy prototxt")
+    parser.add_argument('weights', help="The caffemodel")
+    parser.add_argument('--output', '-o', help="Output caffemodel")
+    parser.add_argument('--conversion', type=str, default="std_to_inv_std",
+                        help='can be "std_to_inv_std" or "inv_std_to_std"')
+    args = parser.parse_args()
+    main(args)
