@@ -26,6 +26,8 @@ void CuDNNBNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   cudnn::createTensor4dDesc<Dtype>(&top_desc_);
   cudnn::createTensor4dDesc<Dtype>(&bn_param_desc_);
   handles_setup_ = true;
+  
+  LOG(INFO)<<"using cuDNN BN engine";
 }
 
 template <typename Dtype>
@@ -47,6 +49,20 @@ void CuDNNBNLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   // Fix to the spatial mode
   CUDNN_CHECK(cudnnDeriveBNTensorDescriptor(bn_param_desc_,
       bottom_desc_, CUDNN_BATCHNORM_SPATIAL));
+
+  if (this->frozen_){
+    this->broadcast_buffer_.ReshapeLike(*(bottom[0]));
+    this->spatial_statistic_.Reshape(this->num_, this->channels_, 1, 1);
+    this->batch_statistic_.Reshape(1, this->channels_, 1, 1);
+
+    this->spatial_sum_multiplier_.Reshape(1, 1, this->height_, this->width_);
+    caffe_set(this->spatial_sum_multiplier_.count(), Dtype(1),
+      this->spatial_sum_multiplier_.mutable_cpu_data());
+    this->batch_sum_multiplier_.Reshape(this->num_, 1, 1, 1);
+    caffe_set(this->batch_sum_multiplier_.count(), Dtype(1),
+      this->batch_sum_multiplier_.mutable_cpu_data());
+
+  }
 }
 
 template <typename Dtype>

@@ -35,19 +35,6 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         bn_param_desc_, scale_data, bias_data,
         running_mean_data, running_variance_data,
         epsilon));
-
-    if (this->frozen_ && this->phase_ != TEST){
-        // copy running mean
-        caffe_copy(this->blobs_[2]->count(), running_mean_data, save_mean_.mutable_gpu_data());
-        // copy running variance to inv variance
-        caffe_copy(this->blobs_[3]->count(), running_variance_data, save_inv_variance_.mutable_gpu_data());
-        // Add eps
-        caffe_gpu_add_scalar(save_inv_variance_.count(), (Dtype)epsilon,
-            save_inv_variance_.mutable_gpu_data());
-        // Inverse standard deviation
-        caffe_gpu_powx(save_inv_variance_.count(), save_inv_variance_.gpu_data(),
-            Dtype(-0.5), save_inv_variance_.mutable_gpu_data());
-    }
   } else {
     Dtype* running_mean_data = this->blobs_[2]->mutable_gpu_data();
     Dtype* running_variance_data = this->blobs_[3]->mutable_gpu_data();
@@ -70,6 +57,10 @@ void CuDNNBNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void CuDNNBNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+   if (this->frozen_){
+     BNLayer<Dtype>::Backward_gpu(top, propagate_down, bottom);
+     return;
+   }
   if (propagate_down[0] || this->param_propagate_down_[0] ||
       this->param_propagate_down_[1]) {
     const Dtype* top_diff = top[0]->gpu_diff();
