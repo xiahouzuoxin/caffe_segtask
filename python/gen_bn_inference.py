@@ -70,8 +70,12 @@ def main(args):
     weights = caffe.Net(args.model, args.weights, caffe.TEST)
     for i, layer in enumerate(model.layer):
         if layer.name not in to_be_absorbed: continue
-        scale, bias, mean, invstd = [p.data.ravel()
-                                     for p in weights.params[layer.name]]
+        scale, bias, mean, tmp = [p.data.ravel()
+                                  for p in weights.params[layer.name]]
+        if args.bn_style == 'invstd':
+            invstd = tmp
+        else:
+            invstd = np.sqrt(tmp + args.epsilon)
         for j in xrange(i - 1, -1, -1):
             bottom_layer = model.layer[j]
             if layer.bottom[0] in bottom_layer.top:
@@ -96,5 +100,9 @@ if __name__ == '__main__':
     parser.add_argument('weights', help="The weights caffemodel")
     parser.add_argument('--output_model')
     parser.add_argument('--output_weights')
+    parser.add_argument('--bn_style', type=str, default='var',
+                        choices=['var', 'invstd'])
+    parser.add_argument('--epsilon', type=float, default=1e-5,
+                        help="The epsilon only used when bn_style is 'var'")
     args = parser.parse_args()
     main(args)
