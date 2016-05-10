@@ -118,7 +118,7 @@ void SyncedMemory::Resize(size_t new_size) {
     size_ = new_size;
     head_ = UNINITIALIZED;
 
-    if (cpu_ptr_) {
+    if (cpu_ptr_ && own_cpu_data_) {
       CaffeFreeHost(cpu_ptr_);
     }
     cpu_ptr_ = NULL;

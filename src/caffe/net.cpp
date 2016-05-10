@@ -1050,9 +1050,25 @@ void Net<Dtype>::MemoryOptimize() {
       Blob<Dtype>* bottom = layer_bottom[i_bottom];
       int idx = FindBlob(slots, bottom);
       if (idx == -1){
-        idx = (int)AcquireSlot(slots, bottom, 1, i);
-        blob_log[bottom] = idx;
-        LOG(INFO)<<"acquired slot for new blob";
+
+        //detect share diff conditions
+        bool sharing_diff = false;
+
+        for (int i_top = 0; i_top < layer_top.size(); ++i_top){
+          if(layers_[i]->is_sharing_diff(i_top, i_bottom)){
+            sharing_diff = true;
+            idx = FindBlob(slots, layer_top[i_top]);
+          }
+        }
+
+        if (!sharing_diff) {
+          idx = (int) AcquireSlot(slots, bottom, 1, i);
+          blob_log[bottom] = idx;
+          LOG(INFO) << "acquired slot for new blob";
+        }else{
+          LOG(INFO) << "sharing diff using slot "<<idx;
+          slots[idx].IncRef();
+        }
       }else{
         // bottom is already registered
         // usually this means in-place operation
@@ -1069,18 +1085,13 @@ void Net<Dtype>::MemoryOptimize() {
 
       // find the top in the slotsp
       int idx = FindBlob(slots, top);
+
+      // look for shared diff
+      if (blob_log.find(top) != blob_log.end()){
+        idx = blob_log[top];
+      }
       if (idx == -1){
         //top blob not found in the table
-        //first check if it is an output blob
-        bool found_in_output = false;
-        for (int i_out = 0; i_out < net_output_blobs_.size(); ++i_out){
-          if (net_output_blobs_[i_out] == top){
-            found_in_output = true;
-            break;
-          }
-        }
-        CHECK(found_in_output)<<"missinng top blob and not found in the output";
-
         // then acquire one slot for it
         if (!layers_[i]->loss(i_top)) {
           idx = (int) AcquireSlot(slots, top, 1, i);
