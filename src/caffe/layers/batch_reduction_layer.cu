@@ -37,39 +37,49 @@ __global__ void BatchReductionForwardKer(const int step, const int num,
 template <typename Dtype>
 void BatchReductionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-    const Dtype* bottom_data = bottom[0]->gpu_data();
-    Dtype* top_data = top[0]->mutable_gpu_data();
-    const Dtype* tick_data = this->ticks_blob_.gpu_data();
-    const bool kMean = (this->op_ == ReductionParameter_ReductionOp_MEAN);
-    const int n_level = this->levels_.size();
+    if (op_ != ReductionParameter_ReductionOp_TOPK){
+        const Dtype* bottom_data = bottom[0]->gpu_data();
+        Dtype* top_data = top[0]->mutable_gpu_data();
+        const Dtype* tick_data = this->ticks_blob_.gpu_data();
+        const bool kMean = (this->op_ == ReductionParameter_ReductionOp_MEAN);
+        const int n_level = this->levels_.size();
 
-    const bool kForward = true; // forward
+        const bool kForward = true; // forward
 
-    caffe_gpu_set(top[0]->count(), Dtype(0), top_data);
-    //invoke kernel
-    BatchReductionForwardKer<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-    <<<CAFFE_GET_BLOCKS(step_), CAFFE_CUDA_NUM_THREADS>>>(
-        step_, num_, n_level, tick_data,
-        kMean, kForward, (Dtype*)bottom_data, top_data);
+        caffe_gpu_set(top[0]->count(), Dtype(0), top_data);
+        //invoke kernel
+        BatchReductionForwardKer<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
+        <<<CAFFE_GET_BLOCKS(step_), CAFFE_CUDA_NUM_THREADS>>>(
+            step_, num_, n_level, tick_data,
+            kMean, kForward, (Dtype*)bottom_data, top_data);
+    }else{
+        // Top-K reduction only supports CPU implementation
+        Forward_cpu(bottom, top);
+    }
 
 }
 
 template <typename Dtype>
 void BatchReductionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
-    const Dtype *top_diff = top[0]->gpu_diff();
-    Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
-    const Dtype *tick_data = this->ticks_blob_.gpu_data();
-    const bool kMean = (this->op_ == ReductionParameter_ReductionOp_MEAN);
-    const int n_level = this->levels_.size();
+    if (op_ != ReductionParameter_ReductionOp_TOPK){
+        const Dtype *top_diff = top[0]->gpu_diff();
+        Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
+        const Dtype *tick_data = this->ticks_blob_.gpu_data();
+        const bool kMean = (this->op_ == ReductionParameter_ReductionOp_MEAN);
+        const int n_level = this->levels_.size();
 
-    const bool kForward = false; // backward
+        const bool kForward = false; // backward
 
-    //invoke kernel
-    BatchReductionForwardKer<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-    <<<CAFFE_GET_BLOCKS(step_), CAFFE_CUDA_NUM_THREADS>>>(
-        step_, num_, n_level, tick_data,
-        kMean, kForward, bottom_diff, (Dtype*)top_diff);
+        //invoke kernel
+        BatchReductionForwardKer<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
+        <<<CAFFE_GET_BLOCKS(step_), CAFFE_CUDA_NUM_THREADS>>>(
+            step_, num_, n_level, tick_data,
+            kMean, kForward, bottom_diff, (Dtype*)top_diff);
+    }else{
+        // Top-K reduction only supports CPU implementation
+        Backward_cpu(top, propagate_down, bottom);
+    }
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(BatchReductionLayer);
