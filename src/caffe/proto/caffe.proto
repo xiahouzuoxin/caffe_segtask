@@ -317,6 +317,7 @@ message LayerParameter {
   // Parameters shared by loss layers.
   optional LossParameter loss_param = 101;
 
+  optional bool no_mem_opt = 900 [default = false];
   // Layer type-specific parameters.
   //
   // Note: certain layers may have more than one computational engine

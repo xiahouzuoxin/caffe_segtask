@@ -1049,6 +1049,8 @@ void Net<Dtype>::MemoryOptimize() {
     for (int i_bottom = 0; i_bottom < layer_bottom.size(); ++i_bottom){
       Blob<Dtype>* bottom = layer_bottom[i_bottom];
       int idx = FindBlob(slots, bottom);
+
+      if (!(layers_[i]->layer_param().no_mem_opt())){
       if (idx == -1){
 
         //detect share diff conditions
@@ -1061,18 +1063,22 @@ void Net<Dtype>::MemoryOptimize() {
           }
         }
 
-        if (!sharing_diff) {
+        if (!sharing_diff ) {
           idx = (int) AcquireSlot(slots, bottom, 1, i);
           blob_log[bottom] = idx;
           LOG(INFO) << "acquired slot for new blob";
         }else{
           LOG(INFO) << "sharing diff using slot "<<idx;
-          slots[idx].IncRef();
+          if(idx != -1) {
+            slots[idx].IncRef();
+            blob_log[bottom] = idx;
+          }
         }
       }else{
         // bottom is already registered
         // usually this means in-place operation
         slots[idx].IncRef();
+      }
       }
       LOG(INFO)<<"bottom blob "<<i_bottom<<" ptr "<<bottom<<" slot id "<<idx;
 
@@ -1090,16 +1096,6 @@ void Net<Dtype>::MemoryOptimize() {
       if (blob_log.find(top) != blob_log.end()){
         idx = blob_log[top];
       }
-      if (idx == -1){
-        //top blob not found in the table
-        // then acquire one slot for it
-        if (!layers_[i]->loss(i_top)) {
-          idx = (int) AcquireSlot(slots, top, 1, i);
-          blob_log[top] = idx;
-          LOG(INFO) << "acquired slot for new output blob";
-        }
-      }
-
       //after the layer's operation, the refcount of top should be decreased by 1
       if (idx != -1)
         slots[idx].DerefOne();
