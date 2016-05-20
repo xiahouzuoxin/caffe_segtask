@@ -1041,7 +1041,9 @@ void Net<Dtype>::MemoryOptimize() {
 
   for (int i = (layers_.size() -1); i >=0; --i){
     vector<Blob<Dtype>* >& layer_top = top_vecs_[i];
+    vector<int> layer_top_idx = top_id_vecs_[i];
     vector<Blob<Dtype>* >& layer_bottom = bottom_vecs_[i];
+    vector<int> layer_bottom_idx = bottom_id_vecs_[i];
 
     LOG(INFO)<<"layer id: "<<i<<" name: "<<layer_names_[i];
 
@@ -1080,7 +1082,9 @@ void Net<Dtype>::MemoryOptimize() {
         slots[idx].IncRef();
       }
       }
-      LOG(INFO)<<"bottom blob "<<i_bottom<<" ptr "<<bottom<<" slot id "<<idx;
+      string blob_name = blob_names_[layer_bottom_idx[i_bottom]];
+      LOG(INFO)<<"bottom blob "<<i_bottom<<" name "
+               <<blob_name<<" ptr "<<bottom<<" slot id "<<idx;
 
     }
 
@@ -1089,7 +1093,7 @@ void Net<Dtype>::MemoryOptimize() {
     for (int i_top = 0; i_top < layer_top.size(); ++i_top){
       Blob<Dtype>* top = layer_top[i_top];
 
-      // find the top in the slotsp
+      // find the top in the slots
       int idx = FindBlob(slots, top);
 
       // look for shared diff
@@ -1100,7 +1104,9 @@ void Net<Dtype>::MemoryOptimize() {
       if (idx != -1)
         slots[idx].DerefOne();
 
-      LOG(INFO)<<"top blob "<<i_top<<" ptr "<<top<<" slot id "<<idx;
+      string blob_name = blob_names_[layer_top_idx[i_top]];
+      LOG(INFO)<<"top blob "<<i_top
+               <<" name "<<blob_name<<" ptr "<<top<<" slot id "<<idx;
     }
 
 
@@ -1129,7 +1135,7 @@ void Net<Dtype>::MemoryOptimize() {
   }
 
   for (int i_mem = 0; i_mem < shared_diff_storage_.size(); i_mem++){
-    count_opt = shared_diff_storage_[i_mem]->size();
+    count_opt += shared_diff_storage_[i_mem]->size();
   }
 
   LOG(INFO)<<"raw memory "<<count_raw<<" opt memory "<<count_opt;
