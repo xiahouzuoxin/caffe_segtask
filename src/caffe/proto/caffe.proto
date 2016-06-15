@@ -1296,6 +1296,7 @@ message BiasParameter {
 message BatchReductionParameter {
     repeated int32 level = 1;
     optional ReductionParameter reduction_param = 2;
+    optional bool pos = 3 [default = false];
 }
 
 message MemoryOptimizationParameter {

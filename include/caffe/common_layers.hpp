@@ -987,6 +987,8 @@ protected:
     int num_;
     /// @brief the step of reduction
     int step_;
+    /// @brief whether to perform position sensitive learning
+    bool pos_;
     /// @brief a helper Blob used for transferring ticks to GPU
     Blob<Dtype> ticks_blob_;
     vector<int> levels_;

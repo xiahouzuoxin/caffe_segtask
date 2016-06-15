@@ -37,7 +37,7 @@ __global__ void BatchReductionForwardKer(const int step, const int num,
 template <typename Dtype>
 void BatchReductionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
-    if (op_ != ReductionParameter_ReductionOp_TOPK){
+    if ((op_ != ReductionParameter_ReductionOp_TOPK) && !pos_){
         const Dtype* bottom_data = bottom[0]->gpu_data();
         Dtype* top_data = top[0]->mutable_gpu_data();
         const Dtype* tick_data = this->ticks_blob_.gpu_data();
@@ -62,7 +62,7 @@ void BatchReductionLayer<Dtype>::Forward_gpu(
 template <typename Dtype>
 void BatchReductionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
-    if (op_ != ReductionParameter_ReductionOp_TOPK){
+    if ((op_ != ReductionParameter_ReductionOp_TOPK) && !pos_){
         const Dtype *top_diff = top[0]->gpu_diff();
         Dtype *bottom_diff = bottom[0]->mutable_gpu_diff();
         const Dtype *tick_data = this->ticks_blob_.gpu_data();
