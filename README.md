@@ -5,6 +5,8 @@
 This branch hosts the code for the technical report ["Towards Good Practices for Very Deep Two-stream ConvNets"](http://arxiv.org/abs/1507.02159), and more.
 
 ### Updates
+- Jul 16, 2016
+  * New working sample: "Real-time Action Recognition with Enhanced Motion Vector CNNs" on CVPR 2016. 
 - Apr 27, 2016
   * cuDNN v5 support, featuring the super fast WINOGrad Convolution and cuDNN implementation of BatchNormalization.
 - Dec 23, 2015
@@ -56,6 +58,9 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
 **Note**: actual batch_size will be `num_device` times `batch_size` specified in network's prototxt.
 
 ### Working Examples
+- Real-time Action Recognition with Enhanced Motion Vector CNNs
+  - [CVPR 2016 paper](https://wanglimin.github.io/papers/ZhangWWQW_CVPR16.pdf)
+  - [Project Size](http://zbwglory.github.io/MV-CNN/index.html)
 - Action recognition on UCF101
   - [Project Site](http://personal.ie.cuhk.edu.hk/~xy012/others/action_recog/)
   - [Caffe Model Files](https://github.com/yjxiong/caffe/tree/action_recog/models/action_recognition)
