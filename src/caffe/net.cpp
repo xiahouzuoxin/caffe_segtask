@@ -965,6 +965,14 @@ const shared_ptr<Layer<Dtype> > Net<Dtype>::layer_by_name(
   return layer_ptr;
 }
 
+/**
+ * This class is the core of memory optimization
+ * It simulates a abstract ``slot'' with preemption.
+ * During the dry-run process, a dynamic number of slots are created when deemed necessary (no empty slot is available
+ * when we are acquring one).
+ * By keeping track of which blob used which slot, we can safely make a series of blobs share the underlying storage
+ * without the risk of data corruption.
+ */
 class SlotMeta {
 public:
     SlotMeta()
@@ -1174,8 +1182,8 @@ void Net<Dtype>::MemoryOptimize() {
     count_raw += bytes * 2;
     int idx = -1;
 
-    // all blobs in the same slot share a same SyncedMem instances
-    // we will keep track of the estimated memory usage reduction while linking them to the publicly hosted storage
+    // all blobs in the same slot share a same externally hosted SyncedMem instance
+    // we will keep track of the estimated memory usage reduction while linking them to the SyncedMem
     if (slot_index.find(name + "_data") != slot_index.end()) {
       idx = slot_index[name + "_data"];
       blobs_[i_blob]->SetDataStorage(shared_storage_[idx]);
