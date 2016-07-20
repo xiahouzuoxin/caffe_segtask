@@ -1086,12 +1086,14 @@ void Net<Dtype>::MemoryOptimize() {
       }
       if (idx >= 0) {
         // idx == -1 if this is an input blob
+        // as a good practice, we do not touch the input blobs' data memory cause leads to unwanted behaviors.
         slots[idx].DerefOne();
       }
       LOG(INFO) << "bottom " << bottom_name << " derefs data slot " << idx;
     }
   }
 
+  // backward pass, try to reuse blobs' diff memory
   for (int i = (layers_.size() -1); i >=0; --i){
     vector<Blob<Dtype>* >& layer_top = top_vecs_[i];
     vector<int> layer_top_idx = top_id_vecs_[i];
@@ -1122,6 +1124,8 @@ void Net<Dtype>::MemoryOptimize() {
         }else{
           LOG(INFO) << "sharing diff using slot "<<idx;
           if(idx != -1) {
+            // idx == -1 means this is an output blob
+            // as a good practice, we do not touch the output blobs' diff memroy cause leads to unwanted behaviors.
             slots[idx].IncRef();
             slot_index[bottom_name + "_diff"] = idx;
           }
@@ -1169,6 +1173,9 @@ void Net<Dtype>::MemoryOptimize() {
     const size_t bytes = blobs_[i_blob]->count() * sizeof(Dtype);
     count_raw += bytes * 2;
     int idx = -1;
+
+    // all blobs in the same slot share a same SyncedMem instances
+    // we will keep track of the estimated memory usage reduction while linking them to the publicly hosted storage
     if (slot_index.find(name + "_data") != slot_index.end()) {
       idx = slot_index[name + "_data"];
       blobs_[i_blob]->SetDataStorage(shared_storage_[idx]);

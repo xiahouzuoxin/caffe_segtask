@@ -21,7 +21,8 @@ This branch hosts the code for the technical report ["Towards Good Practices for
 - Training on optical flow data. 
 - Data augmentation with fixed corner cropping and multi-scale cropping.
 - Parallel training with multiple GPUs.
-- cuDNNv4 integration.
+- Newest cuDNN integration.
+- Slim memory footprints in both training and testing,
 
 ### Usage
 
@@ -54,6 +55,15 @@ make && make install
 mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<Pretrained caffemodel>]
 ```
 **Note**: actual batch_size will be `num_device` times `batch_size` specified in network's prototxt.
+- Runtime memory optimization
+  - Memory optimization drastically reduces memory usage (half for training and almost all for testing) by
+  safely sharing underlying storage of a series of blobs.
+  Note in this case, the Python/Matlab interfaces can no longer retrieve correct contents of affected blobs.
+  - Training time memory optimization is automatically enabled.
+  - To adjust memory optimization setting, add 'optimize_mem' option to the network prototxt. It can be set to
+  `TRAIN_ONLY` (default), `ALL_OPTIM`, and `NO_OPTIM`.
+  - Testing time optimization is disabled by default. To enable testing time optimization, set `optimize_mem` to `NO_OPTIM`
+  - To disable memory optimization, set `optimize_mem` to `NO_OPTIM`. This may be useful when working with intermediate blobs.
 
 ### Working Examples
 - Action recognition on UCF101
