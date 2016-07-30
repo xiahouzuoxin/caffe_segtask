@@ -4,6 +4,15 @@
 
 This branch hosts the code for the technical report ["Towards Good Practices for Very Deep Two-stream ConvNets"](http://arxiv.org/abs/1507.02159), and more.
 
+* [Updates](#updates)
+* [Features](#features)
+* [Usage](#usage)
+* [Working Examples](#working-examples)
+* [Extension](#extension)
+* [Questions](#questions)
+* [Citation](#citation)
+
+
 ### Updates
 - Jul 16, 2016
   * New working sample: "Real-time Action Recognition with Enhanced Motion Vector CNNs" on CVPR 2016. 
