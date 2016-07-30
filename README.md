@@ -58,6 +58,9 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
 **Note**: actual batch_size will be `num_device` times `batch_size` specified in network's prototxt.
 
 ### Working Examples
+- Actionness Estimation Using Hybrid FCNs
+  - [CVPR 2016 paper](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Wang_Actionness_Estimation_Using_CVPR_2016_paper.pdf)
+  - [Project Site](https://github.com/wanglimin/Actionness-Estimation)
 - Real-time Action Recognition with Enhanced Motion Vector CNNs
   - [CVPR 2016 paper](https://wanglimin.github.io/papers/ZhangWWQW_CVPR16.pdf)
   - [Project Site](http://zbwglory.github.io/MV-CNN/index.html)
