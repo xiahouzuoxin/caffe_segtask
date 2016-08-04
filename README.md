@@ -4,6 +4,15 @@
 
 This branch hosts the code for the technical report ["Towards Good Practices for Very Deep Two-stream ConvNets"](http://arxiv.org/abs/1507.02159), and more.
 
+* [Updates](#updates)
+* [Features](#features)
+* [Usage](#usage)
+* [Working Examples](#working-examples)
+* [Extension](#extension)
+* [Questions](#questions)
+* [Citation](#citation)
+
+
 ### Updates
 - Jul 16, 2016
   * New working sample: "Real-time Action Recognition with Enhanced Motion Vector CNNs" on CVPR 2016. 
@@ -68,9 +77,12 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
   - To disable memory optimization, set `optimize_mem` to `NO_OPTIM`. This may be useful when working with intermediate blobs.
 
 ### Working Examples
+- Actionness Estimation Using Hybrid FCNs
+  - [CVPR 2016 paper](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Wang_Actionness_Estimation_Using_CVPR_2016_paper.pdf)
+  - [Project Site](https://github.com/wanglimin/Actionness-Estimation)
 - Real-time Action Recognition with Enhanced Motion Vector CNNs
   - [CVPR 2016 paper](https://wanglimin.github.io/papers/ZhangWWQW_CVPR16.pdf)
-  - [Project Size](http://zbwglory.github.io/MV-CNN/index.html)
+  - [Project Site](http://zbwglory.github.io/MV-CNN/index.html)
 - Action recognition on UCF101
   - [Project Site](http://personal.ie.cuhk.edu.hk/~xy012/others/action_recog/)
   - [Caffe Model Files](https://github.com/yjxiong/caffe/tree/action_recog/models/action_recognition)
