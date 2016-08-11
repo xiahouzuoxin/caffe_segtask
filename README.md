@@ -95,9 +95,22 @@ Contact
 - [Yuanjun Xiong](http://personal.ie.cuhk.edu.hk/~xy012/)
 
 ### Citation
-You are encouraged to also cite the following report if you find this repo helpful
+You are encouraged to also cite the following papers if you find this repo helpful
 
 ```
+@inproceedings{TSN2016ECCV,
+  author    = {Limin Wang and
+               Yuanjun Xiong and
+               Zhe Wang and
+               Yu Qiao and
+               Dahua Lin and
+               Xiaoou Tang and
+               Luc {Val Gool}},
+  title     = {Temporal Segment Networks: Towards Good Practices for Deep Action Recognition},
+  booktitle   = {ECCV},
+  year      = {2016},
+}
+
 @article{MultiGPUCaffe2015,
   author    = {Limin Wang and
                Yuanjun Xiong and
