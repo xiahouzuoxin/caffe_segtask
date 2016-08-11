@@ -14,8 +14,10 @@ This branch hosts the code for the technical report ["Towards Good Practices for
 
 
 ### Updates
+- Aug 1, 2016
+  * New working example: "Actionness Estimation Using Hybrid FCNs" on CVPR 2016.
 - Jul 16, 2016
-  * New working sample: "Real-time Action Recognition with Enhanced Motion Vector CNNs" on CVPR 2016. 
+  * New working example: "Real-time Action Recognition with Enhanced Motion Vector CNNs" on CVPR 2016.
 - Apr 27, 2016
   * cuDNN v5 support, featuring the super fast WINOGrad Convolution and cuDNN implementation of BatchNormalization.
 - Dec 23, 2015
@@ -95,7 +97,7 @@ Contact
 - [Yuanjun Xiong](http://personal.ie.cuhk.edu.hk/~xy012/)
 
 ### Citation
-You are encouraged to also cite the following papers if you find this repo helpful
+You are encouraged to also cite one of the following papers if you find this repo helpful
 
 ```
 @inproceedings{TSN2016ECCV,
