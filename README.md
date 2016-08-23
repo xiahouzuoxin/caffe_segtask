@@ -14,6 +14,8 @@ This branch hosts the code for the technical report ["Towards Good Practices for
 
 
 ### Updates
+- Aug 23, 2016
+  * [Temporal Segment Networks](https://github.com/yjxiong/temporal-segment-networks): a new state of the art action recognition framework is open sourced.
 - Aug 1, 2016
   * New working example: "Actionness Estimation Using Hybrid FCNs" on CVPR 2016.
 - Jul 16, 2016
@@ -69,6 +71,9 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
 **Note**: actual batch_size will be `num_device` times `batch_size` specified in network's prototxt.
 
 ### Working Examples
+- Temporal Segment Networks: Towards Good Practices for Deep Action Recognition
+  - [ECCV 2016 paper](http://arxiv.org/abs/1608.00859v1)
+  - [Action Recognition Framework](https://github.com/yjxiong/temporal-segment-networks)
 - Actionness Estimation Using Hybrid FCNs
   - [CVPR 2016 paper](http://www.cv-foundation.org/openaccess/content_cvpr_2016/papers/Wang_Actionness_Estimation_Using_CVPR_2016_paper.pdf)
   - [Project Site](https://github.com/wanglimin/Actionness-Estimation)
