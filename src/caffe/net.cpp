@@ -644,6 +644,13 @@ void Net<Dtype>::BackwardFromTo(int start, int end) {
   CHECK_LT(start, layers_.size());
 
   for (int i = start; i >= end; --i) {
+    const vector<Blob<Dtype>*>& bottom_vec = bottom_vecs_[i];
+    for (int j = 0; j < bottom_vec.size(); ++j)
+      if (!layer_need_backward_[i] || !bottom_need_backward_[i][j]) {
+        // Manually set the bottom diff to zero if it is not backpropagated.
+        // If not set, they may be corrupted when memory optimization is on.
+        bottom_vec[j]->scale_diff(0);
+      }
     if (layer_need_backward_[i]) {
 
       //DEBUG USE
