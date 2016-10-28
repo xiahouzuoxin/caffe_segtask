@@ -301,9 +301,8 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
   LOG(INFO) << "Memory required for data: " << memory_used_ * sizeof(Dtype);
 
   // optimize memory
-  const bool need_optimze_mem =
-    (param.mem_param().optimize_train() && phase_ == TRAIN)
-    || (param.mem_param().optimize_test() && phase_ == TEST);
+  optimize_memory_ = (param.mem_param().optimize_train() && phase_ == TRAIN) ||
+                     (param.mem_param().optimize_test() && phase_ == TEST);
 
   // add additional specified blobs to the exclusion list
   for (int ex_id = 0; ex_id < param.mem_param().exclude_blob_size(); ++ex_id){
@@ -311,7 +310,7 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
   }
 
   // launch memory optimization if necessary
-  if (!debug_info_ && need_optimze_mem) {
+  if (!debug_info_ && optimize_memory_) {
     MemoryOptimize();
   }
 }
@@ -644,13 +643,15 @@ void Net<Dtype>::BackwardFromTo(int start, int end) {
   CHECK_LT(start, layers_.size());
 
   for (int i = start; i >= end; --i) {
-    const vector<Blob<Dtype>*>& bottom_vec = bottom_vecs_[i];
-    for (int j = 0; j < bottom_vec.size(); ++j)
-      if (!layer_need_backward_[i] || !bottom_need_backward_[i][j]) {
-        // Manually set the bottom diff to zero if it is not backpropagated.
-        // If not set, they may be corrupted when memory optimization is on.
-        bottom_vec[j]->scale_diff(0);
-      }
+    if (optimize_memory_) {
+      // Manually set the bottom diff to zero if it is not backpropagated.
+      // If not set, they may be corrupted when memory optimization is on.
+      const vector<Blob<Dtype>*>& bottom_vec = bottom_vecs_[i];
+      for (int j = 0; j < bottom_vec.size(); ++j)
+        if (!layer_need_backward_[i] || !bottom_need_backward_[i][j]) {
+          bottom_vec[j]->scale_diff(0);
+        }
+    }
     if (layer_need_backward_[i]) {
 
       //DEBUG USE
