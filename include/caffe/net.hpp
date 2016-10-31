@@ -272,6 +272,7 @@ class Net {
   bool debug_info_;
 
   /// Memory optimization related stuff.
+  bool optimize_memory_;
   vector< shared_ptr<SyncedMemory> > shared_storage_;
   std::set<string> excluded_blob_names_;
 
