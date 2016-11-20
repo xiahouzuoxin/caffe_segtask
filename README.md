@@ -81,7 +81,7 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
   - [CVPR 2016 paper](https://wanglimin.github.io/papers/ZhangWWQW_CVPR16.pdf)
   - [Project Site](http://zbwglory.github.io/MV-CNN/index.html)
 - Action recognition on UCF101
-  - [Project Site](http://personal.ie.cuhk.edu.hk/~xy012/others/action_recog/)
+  - [Project Site](http://yjxiong.me/others/action_recog/)
   - [Caffe Model Files](https://github.com/yjxiong/caffe/tree/action_recog/models/action_recognition)
   - [Training scripts and data files examples](https://github.com/yjxiong/caffe/tree/action_recog/examples/action_recognition)
   - [Optical Flow Data](http://mmlab.siat.ac.cn/very_deep_two_stream_model/ucf101_flow_img_tvl1_gpu.zip)
@@ -99,7 +99,7 @@ Its function should be forwarding the "data cursor" in your data layer for one s
 ### Questions
 Contact 
 - [Limin Wang](http://wanglimin.github.io/)
-- [Yuanjun Xiong](http://personal.ie.cuhk.edu.hk/~xy012/)
+- [Yuanjun Xiong](http://yjxiong.me)
 
 ### Citation
 You are encouraged to also cite one of the following papers if you find this repo helpful
