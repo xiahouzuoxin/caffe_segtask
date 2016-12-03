@@ -502,6 +502,9 @@ message ConvolutionParameter {
   optional uint32 stride = 6 [default = 1]; // The stride (equal in Y, X)
   optional uint32 stride_h = 13; // The stride height
   optional uint32 stride_w = 14; // The stride width
+  optional uint32 dilation = 16 [default = 1]; // The dilation (equal in Y, X)
+  optional uint32 dilation_h = 17; // The dilation height
+  optional uint32 dilation_w = 18; // The dilation width
   optional FillerParameter weight_filler = 7; // The filler for the weight
   optional FillerParameter bias_filler = 8; // The filler for the bias
   enum Engine {
