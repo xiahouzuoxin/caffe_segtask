@@ -1,0 +1,20 @@
+# solver
+net: "./train_pspnet50_nyuv2_40cls.prototxt"
+
+test_iter: 100
+test_interval: 5000
+
+lr_policy: "step"
+gamma: 0.1
+stepsize: 20000
+base_lr: 0.0001
+
+average_loss: 20
+display: 10 # 1000
+max_iter: 100000
+momentum: 0.9
+weight_decay: 0.0005
+
+snapshot: 10000
+snapshot_prefix: "snapshots/pspnet50-NYUv2_40cls"
+solver_mode: GPU

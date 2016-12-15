@@ -1,0 +1,20 @@
+# solver
+net: "./train_nyuv2_40cls.prototxt"
+
+test_iter: 10
+test_interval: 1000
+
+lr_policy: "step"
+gamma: 0.1
+stepsize: 5000
+base_lr: 0.001
+
+average_loss: 10
+display: 100
+max_iter: 20000
+momentum: 0.9
+weight_decay: 0.0005
+
+snapshot: 1000
+snapshot_prefix: "snapshots/MSC-LargeFOV-NYUv2_40cls"
+solver_mode: GPU

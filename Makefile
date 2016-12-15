@@ -192,13 +192,13 @@ endif
 ifeq ($(USE_LMDB), 1)
 	LIBRARIES += lmdb
 endif
-ifeq ($(USE_OPENCV), 1)
-	LIBRARIES += opencv_core opencv_highgui opencv_imgproc 
-
-	ifeq ($(OPENCV_VERSION), 3)
-		LIBRARIES += opencv_imgcodecs
-	endif
-endif
+# ifeq ($(USE_OPENCV), 1)
+# 	LIBRARIES += opencv_core opencv_highgui opencv_imgproc 
+# 
+# 	ifeq ($(OPENCV_VERSION), 3)
+# 		LIBRARIES += opencv_imgcodecs
+# 	endif
+# endif
 ifeq ($(USE_MATIO), 1)
 	LIBRARIES += matio
 endif
@@ -415,7 +415,19 @@ USE_PKG_CONFIG ?= 0
 ifeq ($(USE_PKG_CONFIG), 1)
 	PKG_CONFIG := $(shell pkg-config opencv --libs)
 else
-	PKG_CONFIG :=
+	ifeq ($(USE_OPENCV), 1)
+		ifeq ($(OPENCV_VERSION), 3)
+			PKG_CONFIG += $(OPENCV_LIB_PATH)/libopencv_core.so.3.1 \
+						  $(OPENCV_LIB_PATH)/libopencv_imgproc.so.3.1 \
+						  $(OPENCV_LIB_PATH)/libopencv_highgui.so.3.1 \
+						  $(OPENCV_LIB_PATH)/libopencv_imgcodecs.so.3.1
+		else
+			PKG_CONFIG += $(OPENCV_LIB_PATH)/libopencv_core.so.2.4 \
+						  $(OPENCV_LIB_PATH)/libopencv_imgproc.so.2.4 \
+						  $(OPENCV_LIB_PATH)/libopencv_highgui.so.2.4
+			# LIBRARY_DIRS += opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs
+		endif
+	endif
 endif
 LDFLAGS += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) $(PKG_CONFIG) \
 		$(foreach library,$(LIBRARIES),-l$(library))

@@ -177,6 +177,7 @@ void ImageSegDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
   const int new_height = image_data_param.new_height();
   const int new_width  = image_data_param.new_width();
   const int label_type = this->layer_param_.image_data_param().label_type();
+  const int label_span = image_data_param.label_span();
   const int ignore_label = image_data_param.ignore_label();
   const bool is_color  = image_data_param.is_color();
   string root_folder   = image_data_param.root_folder();
@@ -206,10 +207,26 @@ void ImageSegDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       DLOG(INFO) << "Fail to load img: " << root_folder + lines_[lines_id_].first;
     }
     if (label_type == ImageDataParameter_LabelType_PIXEL) {
-      cv_img_seg.push_back(ReadImageToCVMat(root_folder + lines_[lines_id_].second,
-					    new_height, new_width, false));
-      if (!cv_img_seg[1].data) {
-	DLOG(INFO) << "Fail to load seg: " << root_folder + lines_[lines_id_].second;
+      if (label_span == ImageDataParameter_LabelSpan_GRAY) {
+		cv_img_seg.push_back(ReadImageToCVMat(root_folder + lines_[lines_id_].second, 
+					new_height, new_width, false));
+	  } else if (label_span == ImageDataParameter_LabelSpan_RG) {
+		cv::Mat multi_ch_label = ReadImageToCVMat(root_folder + lines_[lines_id_].second,
+							new_height, new_width, true);
+		cv::Mat single_ch_label(multi_ch_label.rows, multi_ch_label.cols, CV_16UC1);
+		// TODO: Test below code
+		// std::vector<cv::Mat> vec_mat;
+		// cv::split(multi_ch_label, vec_mat);
+		for (int r_idx = 0; r_idx < multi_ch_label.rows; ++r_idx) {
+		  for (int c_idx = 0; c_idx < multi_ch_label.cols; ++c_idx) {
+		    single_ch_label.ptr<uint16_t>(r_idx)[c_idx] = 
+				static_cast<uint16_t>(multi_ch_label.ptr<uchar>(r_idx)[c_idx+2])/10*256  // R
+				+ static_cast<uint16_t>(multi_ch_label.ptr<uchar>(r_idx)[c_idx+1]);   // G
+		  }
+		}
+	  } 
+	  if (!cv_img_seg[1].data) {
+        DLOG(INFO) << "Fail to load seg: " << root_folder + lines_[lines_id_].second;
       }
     }
     else if (label_type == ImageDataParameter_LabelType_IMAGE) {
@@ -246,7 +263,7 @@ void ImageSegDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       DLOG(INFO) << "Restarting data prefetching from start.";
       lines_id_ = 0;
       if (this->layer_param_.image_data_param().shuffle()) {
-	ShuffleImages();
+	    ShuffleImages();
       }
     }
   }

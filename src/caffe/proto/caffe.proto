@@ -306,7 +306,8 @@ message ParamSpec {
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
-// LayerParameter next available layer-specific ID: 152 (last added: mat_read_param)
+// LayerParameter next available layer-specific ID: 157 
+// added: InputParameter, BNParameter
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
@@ -359,9 +360,11 @@ message LayerParameter {
   optional BatchNormParameter batch_norm_param = 139;
   optional BiasParameter bias_param = 141;
   optional BiasChannelParameter bias_channel_param = 149;
+  optional BNParameter bn_param = 156;
   optional ConcatParameter concat_param = 104;
   optional ContrastiveLossParameter contrastive_loss_param = 105;
   optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 152;
   optional DataParameter data_param = 107;
   optional DenseCRFParameter dense_crf_param = 146;
   optional DomainTransformParameter domain_transform_param = 147;
@@ -378,17 +381,20 @@ message LayerParameter {
   optional ImageDataParameter image_data_param = 115;
   optional InfogainLossParameter infogain_loss_param = 116;
   optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 155;
   optional InterpParameter interp_param = 143;
   optional LogParameter log_param = 134;
   optional LRNParameter lrn_param = 118;
   optional MatReadParameter mat_read_param = 151;
   optional MatWriteParameter mat_write_param = 145;
   optional MemoryDataParameter memory_data_param = 119;
+  optional MultiStageMeanfieldParameter multi_stage_meanfield_param = 153;
   optional MVNParameter mvn_param = 120;
   optional PoolingParameter pooling_param = 121;
   optional PowerParameter power_param = 122;
   optional PReLUParameter prelu_param = 131;
   optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 154;
   optional ReductionParameter reduction_param = 136;
   optional ReLUParameter relu_param = 123;
   optional ReshapeParameter reshape_param = 133;
@@ -499,6 +505,23 @@ message ArgMaxParameter {
   // By default ArgMaxLayer maximizes over the flattened trailing dimensions
   // for each index of the first / num dimension.
   optional int32 axis = 3;
+}
+
+message BNParameter {
+  optional FillerParameter slope_filler = 1;
+  optional FillerParameter bias_filler = 2;
+  optional float momentum = 3 [default = 0.9];
+  optional float eps = 4 [default = 1e-5];
+  // If true, will use the moving average mean and std for training and test.
+  // Will override the lr_param and freeze all the parameters.
+  // Make sure to initialize the layer properly with pretrained parameters.
+  optional bool frozen = 5 [default = false];
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;
+  }
+  optional Engine engine = 6 [default = DEFAULT];
 }
 
 message BiasChannelParameter {
@@ -637,6 +660,26 @@ message ConvolutionParameter {
   // ignored and the ND implementation will be used.)
   optional bool force_nd_im2col = 17 [default = false];
 }
+
+message CropParameter {
+  // To crop, elements of the first bottom are selected to fit the dimensions
+  // of the second, reference bottom. The crop is configured by
+  // - the crop `axis` to pick the dimensions for cropping
+  // - the crop `offset` to set the shift for all/each dimension
+  // to align the cropped bottom with the reference bottom.
+  // All dimensions up to but excluding `axis` are preserved, while
+  // the dimensions including and trailing `axis` are cropped.
+  // If only one `offset` is set, then all dimensions are offset by this amount.
+  // Otherwise, the number of offsets must equal the number of cropped axes to
+  // shift the crop in each dimension accordingly.
+  // Note: standard dimensions are N,C,H,W so the default is a spatial crop,
+  // and `axis` may be negative to index from the end (e.g., -1 for the last
+  // axis).
+  optional int32 axis = 1 [default = 2];
+  repeated uint32 offset = 2;
+}
+
+
 
 message DataParameter {
   enum DB {
@@ -832,6 +875,12 @@ message ImageDataParameter {
     PIXEL = 2;
   }
   optional LabelType label_type = 16 [default = IMAGE];
+  enum LabelSpan {
+    GRAY = 0;
+	RG   = 1;
+	RGB  = 2;
+  }
+  optional LabelSpan label_span = 17 [default = GRAY];
 
   // DEPRECATED. See TransformationParameter. For data pre-processing, we can do
   // simple scaling and subtracting the data mean, if provided. Note that the
@@ -867,6 +916,14 @@ message InnerProductParameter {
   // of the weight matrix. The weight matrix itself is not going to be transposed
   // but rather the transfer flag of operations will be toggled accordingly.
   optional bool transpose = 6 [default = false];
+}
+
+message InputParameter {
+  // This layer produces N >= 1 top blob(s) to be assigned manually.
+  // Define N shapes to set a shape for each top.
+  // Define 1 shape to set the same shape for every top.
+  // Define no shape to defer to reshaping manually.
+  repeated BlobShape shape = 1;
 }
 
 message InterpParameter {
@@ -926,6 +983,26 @@ message MemoryDataParameter {
   optional uint32 channels = 2;
   optional uint32 height = 3;
   optional uint32 width = 4;
+}
+
+// Message that stores parameters used by MultiStageMeanfieldLayer
+message MultiStageMeanfieldParameter {
+  enum Mode {
+    POTTS = 0;
+  }
+  optional Mode compatibility_mode = 1 [default = POTTS];
+  optional float threshold = 2;
+
+  required float theta_alpha = 3 [default = 10.];
+  required float theta_beta = 4 [default = 10.];
+  required float theta_gamma = 5 [default = 10.];
+
+  required uint32 num_iterations = 6 [default = 1];
+
+  optional string spatial_filter_weights_str = 19 [default=""];
+  optional string bilateral_filter_weights_str = 20 [default=""];
+
+  optional bool force_cpu=29 [default=false];//Force CPU meanfield to use, even though GPU is available
 }
 
 message MVNParameter {
@@ -988,6 +1065,25 @@ message PythonParameter {
   // This value should be set true if you are using it as a data layer.
   optional bool share_in_parallel = 4 [default = false];
 }
+
+// Message that stores parameters used by RecurrentLayer
+message RecurrentParameter {
+  // The dimension of the output (and usually hidden state) representation --
+  // must be explicitly set to non-zero.
+  optional uint32 num_output = 1 [default = 0];
+
+  optional FillerParameter weight_filler = 2; // The filler for the weight
+  optional FillerParameter bias_filler = 3; // The filler for the bias
+
+  // Whether to enable displaying debug_info in the unrolled recurrent net.
+  optional bool debug_info = 4 [default = false];
+
+  // Whether to add as additional inputs (bottoms) the initial hidden state
+  // blobs, and add as additional outputs (tops) the final timestep hidden state
+  // blobs.  The number of additional bottom/top blobs required depends on the
+  // recurrent architecture -- e.g., 1 for RNNs, 2 for LSTMs.
+  optional bool expose_hidden = 5 [default = false];
+} 
 
 // Message that stores parameters used by ReductionLayer
 message ReductionParameter {
