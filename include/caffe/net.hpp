@@ -222,6 +222,7 @@ class Net {
 
   /// @brief do a dry run to decide blob dependency
   void MemoryOptimize();
+  void MemoryOptimize_v2();
 
   /// @brief The network name
   string name_;
