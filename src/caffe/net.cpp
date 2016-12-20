@@ -1149,6 +1149,17 @@ void Net<Dtype>::MemoryOptimize_v2(){
     }
   }
 
+  // Exclude all losses
+  for (int i = 0; i < layers_.size(); ++i){
+    for (int i_top = 0; i_top < top_vecs_[i].size(); ++i_top){
+      if (layers_[i]->loss(i_top)){
+        const string& top_name = blob_names_[top_id_vecs_[i][i_top]];
+        exclude_both(share_record, excluded_names_, top_name);
+        LOG(INFO)<<"excluding loss "<<top_name;
+      }
+    }
+  }
+
   // Pre-works done
   // Dry run to determine dependencies.
 
