@@ -14,7 +14,8 @@ This branch hosts the code for the technical report ["Towards Good Practices for
 
 
 ### Updates
-- Dec, 2016 Major update of codebase. Features include memory optimization and dilated convolution.
+- Dec, 2016
+  * Major updates of the codebase. New features include memory optimization and dilated convolution.
 - Aug 23, 2016
   * [Temporal Segment Networks](https://github.com/yjxiong/temporal-segment-networks): a new state of the art action recognition framework is open sourced.
 - Aug 1, 2016
