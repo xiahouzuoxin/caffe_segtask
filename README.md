@@ -14,6 +14,7 @@ This branch hosts the code for the technical report ["Towards Good Practices for
 
 
 ### Updates
+- Dec, 2016 Major update of codebase. Features include memory optimization and dilated convolution.
 - Aug 23, 2016
   * [Temporal Segment Networks](https://github.com/yjxiong/temporal-segment-networks): a new state of the art action recognition framework is open sourced.
 - Aug 1, 2016
@@ -73,12 +74,7 @@ mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<P
 - Runtime memory optimization
   - Memory optimization drastically reduces memory usage (half for training and almost all for testing) by
   safely sharing underlying storage of a series of blobs.
-  Note in this case, the Python/Matlab interfaces can no longer retrieve correct contents of affected blobs.
-  - Training time memory optimization is automatically enabled.
-  - To adjust memory optimization setting, add 'optimize_mem' option to the network prototxt. It can be set to
-  `TRAIN_ONLY` (default), `ALL_OPTIM`, and `NO_OPTIM`.
-  - Testing time optimization is disabled by default. To enable testing time optimization, set `optimize_mem` to `NO_OPTIM`
-  - To disable memory optimization, set `optimize_mem` to `NO_OPTIM`. This may be useful when working with intermediate blobs.
+  - For usage and the mechanism behind the scene, see the [Wiki Page](https://github.com/yjxiong/caffe/wiki/Memory-Optimization)
 
 ### Working Examples
 - Temporal Segment Networks: Towards Good Practices for Deep Action Recognition
