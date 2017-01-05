@@ -21,6 +21,12 @@ CAFFE_ROOT=/mnt/disk/0/hzxiahouzuoxin/deeplab-public-ver2/
 # 		-solver=solver_nyuv2_40cls.prototxt \
 # 		-weights=./snapshots/MSC-LargeFOV-voc12_iter_6000.caffemodel &> nyuv2_40cls.trainlog &
 
+# Finetune From ADE20K
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_nyuv2_40cls_v2.prototxt \
+# 		-weights=../ade_scene_parsing/snapshots/MSC-LargeFOV-ADE20K_iter_90000.caffemodel &> nyuv2_40cls_v2.trainlog &
+
+
 # ----------------------------------------------------------------------------------------------
 #  Trainning PSPNet101-NYUv2_40cls
 #  Max BatchSize on K40 is 1. TODO
@@ -32,7 +38,36 @@ CAFFE_ROOT=/mnt/disk/0/hzxiahouzuoxin/deeplab-public-ver2/
 # ----------------------------------------------------------------------------------------------
 #  Trainning PSPNet50-NYUv2_40cls
 # ----------------------------------------------------------------------------------------------
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_pspnet50_nyuv2_40cls.prototxt \
+#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> nyuv2_40cls_pspnet50.trainlog &
+
+# ----------------------------------------------------------------------------------------------
+#  Trainning PSPNet50-ADE20K70cls with GPU Batch=1
+# ----------------------------------------------------------------------------------------------
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_pspnet50_ade20k70cls.prototxt \
+#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k70cls_pspnet50.trainlog &
+
+# ----------------------------------------------------------------------------------------------
+#  Trainning PSPNet50-ADE20K64cls
+# ----------------------------------------------------------------------------------------------
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_pspnet50_ade20k64cls.prototxt \
+#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50.trainlog &
+
 nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
-		-solver=solver_pspnet50_nyuv2_40cls.prototxt \
- 		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> nyuv2_40cls_pspnet50.trainlog &
+		-solver=solver_pspnet50_ade20k64cls_v2.prototxt \
+ 		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_v2.trainlog &
+
+# ----------------------------------------------------------------------------------------------
+#  Trainning PSPNet50-ADE20K64cls Multiscale Version
+# ----------------------------------------------------------------------------------------------
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_pspnet50_ms.prototxt \
+#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_ms.trainlog &
+
+# nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
+# 		-solver=solver_pspnet50_msv2.prototxt \
+#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_msv2.trainlog &
 

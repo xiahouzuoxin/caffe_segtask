@@ -96,3 +96,8 @@ MANIFEST-*
 
 # 
 tags
+*.log
+*.trainlog
+
+# extra directory
+examples/indoor/results/*

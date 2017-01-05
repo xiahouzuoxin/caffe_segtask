@@ -210,6 +210,7 @@ void ImageSegDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       if (label_span == ImageDataParameter_LabelSpan_GRAY) {
 		cv_img_seg.push_back(ReadImageToCVMat(root_folder + lines_[lines_id_].second, 
 					new_height, new_width, false));
+	    // std::cout << cv_img_seg[1];
 	  } else if (label_span == ImageDataParameter_LabelSpan_RG) {
 		cv::Mat multi_ch_label = ReadImageToCVMat(root_folder + lines_[lines_id_].second,
 							new_height, new_width, true);
@@ -224,6 +225,7 @@ void ImageSegDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
 				+ static_cast<uint16_t>(multi_ch_label.ptr<uchar>(r_idx)[c_idx+1]);   // G
 		  }
 		}
+	    cv_img_seg.push_back(single_ch_label);
 	  } 
 	  if (!cv_img_seg[1].data) {
         DLOG(INFO) << "Fail to load seg: " << root_folder + lines_[lines_id_].second;
