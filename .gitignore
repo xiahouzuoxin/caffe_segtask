@@ -103,3 +103,7 @@ tags
 # extra directory
 examples/indoor/results/*
 .cache
+
+export_to_mxnet
+.export_to_mxnet_debug
+.export_to_mxnet_release

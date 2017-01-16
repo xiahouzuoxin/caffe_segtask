@@ -1,0 +1,152 @@
+From a76a6fbef4c018b1354ebc884af70675597faecc Mon Sep 17 00:00:00 2001
+From: haoran <hrwangchengdu@hotmail.com>
+Date: Sat, 30 Jan 2016 01:55:32 +0800
+Subject: [PATCH 1/3] add interfaces for mxnet
+
+---
+ include/caffe/blob.hpp  |  3 +++
+ include/caffe/layer.hpp | 19 +++++++++++++++++++
+ src/caffe/blob.cpp      | 18 ++++++++++++++++++
+ 3 files changed, 40 insertions(+)
+
+diff --git a/include/caffe/blob.hpp b/include/caffe/blob.hpp
+index af360ac..2eab166 100644
+--- a/include/caffe/blob.hpp
++++ b/include/caffe/blob.hpp
+@@ -218,6 +218,9 @@ class Blob {
+ 
+   const Dtype* cpu_data() const;
+   void set_cpu_data(Dtype* data);
++  void set_cpu_diff(Dtype* data);
++  void set_gpu_data(Dtype* data);
++  void set_gpu_diff(Dtype* data);
+   const int* gpu_shape() const;
+   const Dtype* gpu_data() const;
+   const Dtype* cpu_diff() const;
+diff --git a/include/caffe/layer.hpp b/include/caffe/layer.hpp
+index 10f353f..84dabee 100644
+--- a/include/caffe/layer.hpp
++++ b/include/caffe/layer.hpp
+@@ -184,6 +184,25 @@ class Layer {
+   }
+ 
+   /**
++   * @brief Sets blobs
++   */
++  void SetBlobs(const vector<Blob<Dtype>*>& weights) {
++    CHECK_EQ(blobs_.size(), weights.size());
++    for (int i = 0; i < weights.size(); ++i)
++      blobs_[i].reset(weights[i]);
++  }
++
++  /**
++   * @brief Gets blobs with normal pointer
++   */
++  vector<Blob<Dtype>*> GetBlobs() {
++    vector<Blob<Dtype>*> ans;
++    for (int i = 0; i < blobs_.size(); ++i)
++      ans.push_back(blobs_[i].get());
++    return ans;
++  }
++
++  /**
+    * @brief Returns the layer parameter.
+    */
+   const LayerParameter& layer_param() const { return layer_param_; }
+diff --git a/src/caffe/blob.cpp b/src/caffe/blob.cpp
+index 4a34e4c..d326625 100644
+--- a/src/caffe/blob.cpp
++++ b/src/caffe/blob.cpp
+@@ -93,6 +93,24 @@ void Blob<Dtype>::set_cpu_data(Dtype* data) {
+ }
+ 
+ template <typename Dtype>
++void Blob<Dtype>::set_gpu_data(Dtype* data) {
++  CHECK(data);
++  data_->set_gpu_data(data);
++}
++
++template <typename Dtype>
++void Blob<Dtype>::set_cpu_diff(Dtype* diff) {
++  CHECK(diff);
++  diff_->set_cpu_data(diff);
++}
++
++template <typename Dtype>
++void Blob<Dtype>::set_gpu_diff(Dtype* diff) {
++  CHECK(diff);
++  diff_->set_gpu_data(diff);
++}
++
++template <typename Dtype>
+ const Dtype* Blob<Dtype>::gpu_data() const {
+   CHECK(data_);
+   return (const Dtype*)data_->gpu_data();
+
+From bf4a6d195aba5ff0a65098068d04005534c7c1bd Mon Sep 17 00:00:00 2001
+From: tenstep <wangdq@me.com>
+Date: Fri, 5 Aug 2016 21:19:50 +0800
+Subject: [PATCH 2/3] Remove set/get blob.
+
+---
+ include/caffe/layer.hpp | 19 -------------------
+ 1 file changed, 19 deletions(-)
+
+diff --git a/include/caffe/layer.hpp b/include/caffe/layer.hpp
+index 84dabee..10f353f 100644
+--- a/include/caffe/layer.hpp
++++ b/include/caffe/layer.hpp
+@@ -184,25 +184,6 @@ class Layer {
+   }
+ 
+   /**
+-   * @brief Sets blobs
+-   */
+-  void SetBlobs(const vector<Blob<Dtype>*>& weights) {
+-    CHECK_EQ(blobs_.size(), weights.size());
+-    for (int i = 0; i < weights.size(); ++i)
+-      blobs_[i].reset(weights[i]);
+-  }
+-
+-  /**
+-   * @brief Gets blobs with normal pointer
+-   */
+-  vector<Blob<Dtype>*> GetBlobs() {
+-    vector<Blob<Dtype>*> ans;
+-    for (int i = 0; i < blobs_.size(); ++i)
+-      ans.push_back(blobs_[i].get());
+-    return ans;
+-  }
+-
+-  /**
+    * @brief Returns the layer parameter.
+    */
+   const LayerParameter& layer_param() const { return layer_param_; }
+
+From ddd8cd8e061de960404e91972079467ca9ebace3 Mon Sep 17 00:00:00 2001
+From: Haoran <hrwangchengdu@hotmail.com>
+Date: Fri, 30 Sep 2016 01:42:12 +0800
+Subject: [PATCH 3/3] Add SetPhase() interface
+
+---
+ include/caffe/layer.hpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/include/caffe/layer.hpp b/include/caffe/layer.hpp
+index 10f353f..79d3a00 100644
+--- a/include/caffe/layer.hpp
++++ b/include/caffe/layer.hpp
+@@ -177,6 +177,13 @@ class Layer {
+       const vector<Blob<Dtype>*>& bottom);
+ 
+   /**
++   * @brief Set phase: TRAIN or TEST
++   */
++  inline void SetPhase(Phase p) {
++    phase_ = p;
++  }
++
++  /**
+    * @brief Returns the vector of learnable parameter blobs.
+    */
+   vector<shared_ptr<Blob<Dtype> > >& blobs() {
