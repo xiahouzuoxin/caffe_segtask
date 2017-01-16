@@ -28,11 +28,20 @@ Net<Dtype>::Net(const NetParameter& param, const Net* root_net)
 }
 
 template <typename Dtype>
-Net<Dtype>::Net(const string& param_file, Phase phase, const Net* root_net)
+Net<Dtype>::Net(const string& param_file, Phase phase, 
+		const int level, const vector<string>* stages,
+		const Net* root_net)
     : root_net_(root_net) {
   NetParameter param;
   ReadNetParamsFromTextFileOrDie(param_file, &param);
+  // Set phase, stages and level
   param.mutable_state()->set_phase(phase);
+  if (stages != NULL) {
+    for (int i = 0; i < stages->size(); i++) {
+      param.mutable_state()->add_stage((*stages)[i]);
+	}
+  }
+  param.mutable_state()->set_level(level);
   Init(param);
 }
 
@@ -118,6 +127,12 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
     int num_top = layer_param.top_size();
     for (int top_id = 0; top_id < num_top; ++top_id) {
       AppendTop(param, layer_id, top_id, &available_blobs, &blob_name_to_idx);
+	  // Collect Input layer tops as Net inputs
+	  if (layer_param.type() == "Input") {
+	    const int blob_id = blobs_.size() - 1;
+		net_input_blob_indices_.push_back(blob_id);
+		net_input_blobs_.push_back(blobs_[blob_id].get());
+	  }
     }
     // If the layer specifies that AutoTopBlobs() -> true and the LayerParameter
     // specified fewer than the required number (as specified by

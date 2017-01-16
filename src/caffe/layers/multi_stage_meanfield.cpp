@@ -11,6 +11,10 @@
  *             Chang Huang, Philip H. S. Torr. Conditional Random Fields as Recurrent Neural Networks. IEEE ICCV 2015.
  *
  *             For more information about CRF-RNN, please visit the project website http://crfasrnn.torr.vision.
+ *
+ *  Pariwise Term = 
+ *     \omega_1\exp^{ -\frac{||p_i-p_j||^2}{2\alpha^2}-\frac{||I_i-I_j||^2}{2\beta^2} }
+ *   + \omega_2\exp^{ -\frac{||p_i-p_j||^2}{2\gamma^2} }
  */
 #include <vector>
 #include <boost/lexical_cast.hpp>

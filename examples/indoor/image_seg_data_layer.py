@@ -29,6 +29,7 @@ class ImageSegDataLayer(caffe.Layer):
 		if len(bottom) != 0: 
 			raise Exception("Do not define a bottom.")
 		
+		# File Format: Deeplab list format
 		self.indices = open(self.src_list, 'r').readlines()
 		self.idx  = 0
 
@@ -104,7 +105,7 @@ class ImageSegDataLayer(caffe.Layer):
 
 		if (gt.ndim == 3):
 			gt = gt[:,:,0]
-		gt -= 1   # 0->255 & others-1
+		gt -= 1   # Round 0->255 & others-1
 		gt = gt[np.newaxis,...]
 
 		# print gt.shape, im.shape

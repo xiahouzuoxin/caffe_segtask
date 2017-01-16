@@ -16,10 +16,10 @@ def parse_input(argv):
 	parser = argparse.ArgumentParser()
 	parser.add_argument("img", help="Input image")
 	parser.add_argument("--outdir", default="", help="Out Dir")
-	parser.add_argument("--model", default="./test.prototxt", help="Caffe prototxt file")
-	parser.add_argument("--clstxt", default="./ADE20K/classes_64.txt", help="class file(1 class 1 line)")
+	parser.add_argument("--model", default="./test_pspnet50_ade20k64cls_v2.prototxt", help="Caffe prototxt file")
+	parser.add_argument("--clstxt", default="./ADE20K/classes_63.txt", help="class file(1 class 1 line)")
 	parser.add_argument("--weights", 
-			default="./snapshots/MSC-LargeFOV-voc12_iter_20000.caffemodel",
+			default="./snapshots/pspnet50-ADE20K64cls_v2_iter_200000.caffemodel",
 			help="Caffe pre-trained weight file")
 	parser.add_argument("--gpu", default=True, help="Use gpu")
 	args = parser.parse_args()

@@ -4,9 +4,10 @@ This code is based on [Deeplab v2](https://bitbucket.org/aquariusjay/deeplab-pub
 
 - Fixed the `batch_norm_layer`'s bug by replacing with [caffe-master](https://github.com/BVLC/caffe)'s `batch_norm_layer`
 - Merge `crop_layer` from [caffe-master](https://github.com/BVLC/caffe) for FCN support 
-- Merge PSPNet support by merging `bn_layer` from <https://github.com/hszhao/PSPNet>
 - Merge `multi_stage_meanfield` layer from <https://github.com/bittnt/caffe/tree/crfrnn> for [CRFasRNN](https://github.com/torrvision/crfasrnn) merge 
 - Modify `image_seg_data_layer.cpp` to support class segmentation label index > 256. if set `label_span: RG` in prototxt,`Index=R/10*256+G`.
+- Merge [LRCN](http://jeffdonahue.com/lrcn/) support with coco caption example included.
+- Merge PSPNet support by merging `bn_layer` from [PSPNet](https://github.com/hszhao/PSPNet) while without MPI-support for multi-batch train currenttly.
 
 ## Tips
 
@@ -56,7 +57,6 @@ This code is based on [Deeplab v2](https://bitbucket.org/aquariusjay/deeplab-pub
 	  }
 	}
 	```
-
 ## Install
 
 The same to [Deeplab v2](https://bitbucket.org/aquariusjay/deeplab-public-ver2).

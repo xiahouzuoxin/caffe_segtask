@@ -56,16 +56,27 @@ CAFFE_ROOT=/mnt/disk/0/hzxiahouzuoxin/deeplab-public-ver2/
 # 		-solver=solver_pspnet50_ade20k64cls.prototxt \
 #  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50.trainlog &
 
+# ${CAFFE_ROOT}/build/tools/caffe.bin test -gpu=1 \
+# 	-model=train_pspnet50_ade20k64cls.prototxt \
+# 	-weights=snapshots/pspnet50-ADE20K64cls_iter_200000.caffemodel \
+# 	-iterations=4780
+
+# ====== 63cls ======
 nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
 		-solver=solver_pspnet50_ade20k64cls_v2.prototxt \
  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_v2.trainlog &
+
+# ${CAFFE_ROOT}/build/tools/caffe.bin test -gpu=0 \
+# 	-model=train_pspnet50_ade20k64cls_v2.prototxt \
+# 	-weights=snapshots/pspnet50-ADE20K64cls_v2_iter_200000.caffemodel \
+# 	-iterations=4780
 
 # ----------------------------------------------------------------------------------------------
 #  Trainning PSPNet50-ADE20K64cls Multiscale Version
 # ----------------------------------------------------------------------------------------------
 # nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
 # 		-solver=solver_pspnet50_ms.prototxt \
-#  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_ms.trainlog &
+#  		-weights=snapshots/pspnet50-ADE20K64cls_v2_iter_200000.caffemodel &> ade20k64cls_pspnet50_ms.trainlog &
 
 # nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
 # 		-solver=solver_pspnet50_msv2.prototxt \

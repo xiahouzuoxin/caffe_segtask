@@ -44,6 +44,18 @@ layer {
   }
   include: { phase: TEST }
 }
+# layer {
+#   name: "data"
+#   type: "Python"
+#   top: "data"
+#   top: "label"
+#   python_param {
+#     module: "image_seg_data_layer"
+#     layer: "ImageSegDataLayer"
+# 	param_str: "{\'seed\':1337, \'root_dir\':\'ADE20K\', \'src_list\':\'ADE20K/val_indoor_v2.deeplablist\', \'split\':\'test\', \'mean\':(104.008,116.669,122.675)}"
+#   }
+#   include: { phase: TEST}
+# }
 
 layer {
   name: "conv1_1_3x3_s2"
