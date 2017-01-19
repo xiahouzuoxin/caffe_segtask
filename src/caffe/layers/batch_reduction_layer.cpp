@@ -34,6 +34,7 @@ void BatchReductionLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   for (int i = 0; i < n_level; ++i){
     levels_.push_back(this->layer_param_.batch_reduction_param().level(i));
     ticks_.push_back(levels_.back() * levels_.back());
+    max_tick_ = std::max(ticks_.back(), max_tick_);
   }
 
   // top-k reduction currently only works with single level
@@ -88,6 +89,7 @@ void BatchReductionLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   Dtype* tick_data = ticks_blob_.mutable_cpu_data();
   for (int i = 0; i < levels_.size(); ++i){
     tick_data[i] = ticks_[i];
+    max_tick_ = std::max(ticks_[i], max_tick_);
   }
 
   // reshape idx blob in top-k case

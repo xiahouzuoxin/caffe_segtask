@@ -1031,6 +1031,7 @@ protected:
     Blob<Dtype> ticks_blob_;
     vector<int> levels_;
     vector<int> ticks_;
+    int max_tick_;
 
     Blob<Dtype> argsort_idx_;
 };
