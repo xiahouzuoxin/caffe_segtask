@@ -91,3 +91,7 @@ LOCK
 LOG*
 CURRENT
 MANIFEST-*
+
+# 
+*.trainlog
+*.testlog
