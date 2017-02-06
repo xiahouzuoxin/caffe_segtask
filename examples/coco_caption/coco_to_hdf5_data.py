@@ -271,7 +271,7 @@ def process_coco(include_trainval=False):
        ('train', 'train', 100000, True),
        ('val', 'val', 100000, True),
        # Write unaligned datasets as well:
-       ('train', 'train', 100000, False)
+       ('train', 'train', 100000, False),
        ('val', 'val', 100000, False),
   ]
   # Also create a 'trainval' set if include_trainval is set.
