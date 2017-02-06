@@ -170,8 +170,8 @@ ifneq ($(CPU_ONLY), 1)
 	LIBRARIES := cudart cublas curand
 endif
 LIBRARIES += glog gflags protobuf leveldb snappy \
-	lmdb boost_system hdf5_hl hdf5 m \
-	opencv_core opencv_highgui opencv_imgproc
+	lmdb boost_system hdf5_hl hdf5 m
+#	opencv_core opencv_highgui opencv_imgproc
 PYTHON_LIBRARIES := boost_python python2.7
 WARNINGS := -Wall -Wno-sign-compare
 
@@ -356,11 +356,31 @@ MATLAB_CXXFLAGS := $(CXXFLAGS) -Wno-uninitialized
 LINKFLAGS += -pthread -fPIC $(COMMON_FLAGS) $(WARNINGS)
 
 USE_PKG_CONFIG ?= 0
+# ifeq ($(USE_PKG_CONFIG), 1)
+# 	PKG_CONFIG := $(shell pkg-config opencv --libs)
+# else
+# 	PKG_CONFIG :=
+# endif
+
 ifeq ($(USE_PKG_CONFIG), 1)
 	PKG_CONFIG := $(shell pkg-config opencv --libs)
 else
-	PKG_CONFIG :=
+	ifeq ($(USE_OPENCV), 1)
+	  ifeq ($(OPENCV_VERSION), 3)
+	    PKG_CONFIG += $(OPENCV_LIB_PATH)/libopencv_core.so.3.1 \
+	    							$(OPENCV_LIB_PATH)/libopencv_imgproc.so.3.1 \
+	    							$(OPENCV_LIB_PATH)/libopencv_highgui.so.3.1 \
+	    							$(OPENCV_LIB_PATH)/libopencv_imgcodecs.so.3.1
+	  else
+	    PKG_CONFIG += $(OPENCV_LIB_PATH)/libopencv_core.so.2.4 \
+	    							$(OPENCV_LIB_PATH)/libopencv_imgproc.so.2.4 \
+	    							$(OPENCV_LIB_PATH)/libopencv_highgui.so.2.4
+	    # LIBRARY_DIRS += opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs
+	  endif
+	endif
 endif
+
+
 LDFLAGS += $(foreach librarydir,$(LIBRARY_DIRS),-L$(librarydir)) $(PKG_CONFIG) \
 		$(foreach library,$(LIBRARIES),-l$(library))
 PYTHON_LDFLAGS := $(LDFLAGS) $(foreach library,$(PYTHON_LIBRARIES),-l$(library))
