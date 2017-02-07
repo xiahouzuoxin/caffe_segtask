@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "caffe/common_layers.hpp"
-#include "caffe/layer.hpp"
+#include "caffe/filler.hpp"
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {
@@ -21,6 +21,8 @@ void BNLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     vector<int> shape;
     shape.push_back(1);
     shape.push_back(bottom[0]->channels());
+    shape.push_back(1);
+    shape.push_back(1);
     // slope
     this->blobs_[0].reset(new Blob<Dtype>(shape));
     shared_ptr<Filler<Dtype> > slope_filler(GetFiller<Dtype>(
@@ -341,5 +343,5 @@ STUB_GPU(BNLayer);
 #endif
 
 INSTANTIATE_CLASS(BNLayer);
-
+// REGISTER_LAYER_CLASS(BN);
 }  // namespace caffe

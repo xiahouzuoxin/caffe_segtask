@@ -24,7 +24,7 @@ list(APPEND Caffe_LINKER_LIBS ${GFLAGS_LIBRARIES})
 include(cmake/ProtoBuf.cmake)
 
 # ---[ HDF5
-find_package(HDF5 COMPONENTS HL REQUIRED)
+find_package(HDF5 COMPONENTS C HL REQUIRED)
 include_directories(SYSTEM ${HDF5_INCLUDE_DIRS} ${HDF5_HL_INCLUDE_DIR})
 list(APPEND Caffe_LINKER_LIBS ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 
@@ -157,7 +157,8 @@ if(BUILD_docs)
 endif()
 
 if (USE_MPI)
-  set(MPIEXEC "/usr/local/openmpi/bin/mpiexec")
+  set(MPIEXEC "/home/hzxiahouzuoxin/usr/bin/mpiexec")
+  set(MPI_ROOT "/home/hzxiahouzuoxin/usr/")
   find_package(MPI)
   include_directories(SYSTEM ${MPI_CXX_INCLUDE_PATH})
   list(APPEND Caffe_LINKER_LIBS ${MPI_CXX_LIBRARIES})

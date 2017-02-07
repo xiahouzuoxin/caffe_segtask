@@ -20,3 +20,4 @@ weight_decay: 0.0005
 snapshot: 20000
 snapshot_prefix: "snapshots/pspnet50-ADE20K64cls_v2"
 solver_mode: GPU
+device_id: [0,1,2,3]
