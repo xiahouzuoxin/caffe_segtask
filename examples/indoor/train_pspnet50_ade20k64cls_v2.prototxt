@@ -1,5 +1,9 @@
 #
 name: "psp50_train"
+mem_param {
+  optimize_train: true
+  optimize_test: true
+}
 
 layer {
   name: "data"

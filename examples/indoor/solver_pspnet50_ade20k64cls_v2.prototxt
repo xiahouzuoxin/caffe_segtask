@@ -7,7 +7,7 @@ test_initialization: false
 
 lr_policy: "poly"
 gamma: 0.1
-base_lr: 1e-4 # 0.00001
+base_lr: 1e-7 # 1e-4, smaller learning rate for multi-gpu 
 power: 0.9
 stepsize: 20000
 
@@ -20,4 +20,4 @@ weight_decay: 0.0005
 snapshot: 20000
 snapshot_prefix: "snapshots/pspnet50-ADE20K64cls_v2"
 solver_mode: GPU
-device_id: [0,1,2,3]
+device_id: [0,1,2]

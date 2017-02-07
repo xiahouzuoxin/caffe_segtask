@@ -8,6 +8,8 @@ Updates:
 - update `net.cpp` with explicit output log message 
 - Add `indoor` example (see `train_script.sh`) which use multi-gpu train [PSPNet](https://github.com/hszhao/PSPNet)
 
+MPI version > 1.7.2, `--with-cuda --enable-mpi-thread-multiple` for optimal performance.
+
 Compile with cmake is prefer for this branch(with MPI), for example:
 
 ```
@@ -15,7 +17,7 @@ Compile with cmake is prefer for this branch(with MPI), for example:
 mkdir build && cd build
 cmake ../ -DUSE_MPI=ON -DUSE_CUDNN=OFF -DBLAS=Open
 make && make install
-mpirun -np 4 ./install/bin/caffe train --solver=<Your Solver File> [--weights=<Pretrained caffemodel>]
+mpirun -np ${GPU_NUM} ./install/bin/caffe train --solver=<Your Solver File> [--weights=<Pretrained caffemodel>]
 ```
 
 More about MPI usage refrence to [yjxiong](https://github.com/yjxiong/caffe/tree/mem).

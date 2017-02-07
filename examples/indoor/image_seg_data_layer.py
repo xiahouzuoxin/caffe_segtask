@@ -22,6 +22,7 @@ class ImageSegDataLayer(caffe.Layer):
 		self.random = params.get('randomize', False)
 		self.seed = params.get('seed', None)
 		self.crop = 473
+                self.batch_size = 2
 
         # two tops: data and label 
 		if len(top) != 2: 
@@ -46,21 +47,21 @@ class ImageSegDataLayer(caffe.Layer):
 		# load image + label image dir
 		self.data, self.label = self.load_data(self.idx)
 		# reshape tops to fit
-		top[0].reshape(1, *self.data.shape)
-		top[1].reshape(1, *self.label.shape)
+		top[0].reshape(self.batch_size, *self.data.shape)
+		top[1].reshape(self.batch_size, *self.label.shape)
 
-	def forward(self, bottom, top):
-		# assign output
-		top[0].data[...] = self.data
-		top[1].data[...] = self.label
+	def forward(self, bottom, top): 
+            for it in range(self.batch_size):
+		  # assign output
+		  top[0].data[it, ...], top[1].data[it, ...] = self.load_data(self.idx)
 		
-		# pick next input
-		if self.random:
-			self.idx = random.randint(0, len(self.indices)-1)
-		else:
-			self.idx += 1
-			if self.idx == len(self.indices):
-				self.idx = 0
+		  # pick next input
+		  if self.random:
+		  	self.idx = random.randint(0, len(self.indices)-1)
+		  else:
+		  	self.idx += 1
+		  	if self.idx == len(self.indices):
+		  		self.idx = 0
 
 	def backward(self, top, propagate_down, bottom):
 		pass
