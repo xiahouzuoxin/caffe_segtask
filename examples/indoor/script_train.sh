@@ -66,7 +66,7 @@ CAFFE_ROOT=../../
 # 		-solver=solver_pspnet50_ade20k64cls_v2.prototxt \
 #  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_v2.trainlog &
 
-nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 3 ${CAFFE_ROOT}/build/tools/caffe train \
+nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 4 ${CAFFE_ROOT}/build/tools/caffe train \
 		-solver=solver_pspnet50_ade20k64cls_v2.prototxt \
  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_v2.trainlog &
 
