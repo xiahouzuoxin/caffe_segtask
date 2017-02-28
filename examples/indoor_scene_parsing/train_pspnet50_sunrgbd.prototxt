@@ -1,44 +1,46 @@
 #
-name: "psp50_train"
-
-input: "data"
-input_shape {
-  dim: 1
-  dim: 3
-  dim: 473
-  dim: 473
-}
-
-# layer {
-#   name: "data"
-#   type: "Python"
-#   top: "data"
-#   top: "label"
-#   python_param {
-#     module: "image_seg_data_layer"
-#     layer: "ImageSegDataLayer"
-#     param_str: "{\'seed\':1337, \'root_dir\':\'ADE20K\', \'src_list\':\'ADE20K/train_indoor_v2.deeplablist\', \'split\':\'train\', \'mean\':(104.008,116.669,122.675)}"
-#   }
-#   include: { phase: TRAIN }
-# }
-# 
-# layer {
-#   name: "data"
-#   type: "Python"
-#   top: "data"
-#   top: "label"
-#   python_param {
-#     module: "image_seg_data_layer"
-#     layer: "ImageSegDataLayer"
-# 	param_str: "{\'seed\':1337, \'root_dir\':\'ADE20K\', \'src_list\':\'ADE20K/val_indoor_v2.deeplablist\', \'split\':\'test\', \'mean\':(104.008,116.669,122.675)}"
-#   }
-#   include: { phase: TEST}
-# }
+name: "psp50_train_fuse_depth"
 
 layer {
-  name: "conv1_1_3x3_s2"
-  type: "Convolution"
+  name: "data"
+  type: "Python"
+  top: "data"
+  top: "label"
+  top: "depth"
+  python_param {
+    module: "image_seg_data_layer"
+    layer: "ImageSegDataLayer"
+    param_str: "{\'seed\':1337, \'root_dir\':\'SUNRGBD\', \'src_list\':\'SUNRGBD/train.lst\', \'split\':\'train\', \'mean\':(104.008,116.669,122.675,1.9630)}"
+  }
+  include: { phase: TRAIN }
+}
+
+layer {
+  name: "data"
+  type: "Python"
+  top: "data"
+  top: "label"
+  top: "depth"
+  python_param {
+    module: "image_seg_data_layer"
+    layer: "ImageSegDataLayer"
+	param_str: "{\'seed\':1337, \'root_dir\':\'SUNRGBD\', \'src_list\':\'SUNRGBD/val.lst\', \'split\':\'test\', \'mean\':(104.008,116.669,122.675,1.9630)}"
+  }
+  include: { phase: TEST}
+}
+
+layer {
+  name: "fuse_depth"
+  type: "Concat"
   bottom: "data"
+  bottom: "depth"
+  top: "data_fuse_depth"
+}
+
+layer {
+  name: "conv1_1_3x3_s2_fuse_depth"
+  type: "Convolution"
+  bottom: "data_fuse_depth"
   top: "conv1_1_3x3_s2"
   param {
     lr_mult: 1
@@ -85,7 +87,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -145,7 +147,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -205,7 +207,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -277,7 +279,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -337,7 +339,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -397,7 +399,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -451,7 +453,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -521,7 +523,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -581,7 +583,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -641,7 +643,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -711,7 +713,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -771,7 +773,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -831,7 +833,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -901,7 +903,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -961,7 +963,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1021,7 +1023,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1075,7 +1077,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1145,7 +1147,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1205,7 +1207,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1265,7 +1267,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1335,7 +1337,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1395,7 +1397,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1455,7 +1457,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1525,7 +1527,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1585,7 +1587,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1645,7 +1647,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1715,7 +1717,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1776,7 +1778,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1836,7 +1838,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1890,7 +1892,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -1960,7 +1962,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2021,7 +2023,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2081,7 +2083,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2151,7 +2153,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2212,7 +2214,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2272,7 +2274,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2342,7 +2344,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2403,7 +2405,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2463,7 +2465,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2533,7 +2535,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2594,7 +2596,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2654,7 +2656,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2724,7 +2726,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2785,7 +2787,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2845,7 +2847,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2915,7 +2917,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -2976,7 +2978,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3036,7 +3038,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3090,7 +3092,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3160,7 +3162,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3221,7 +3223,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3281,7 +3283,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3351,7 +3353,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3412,7 +3414,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3472,7 +3474,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3552,7 +3554,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3632,7 +3634,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3712,7 +3714,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3792,7 +3794,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3872,7 +3874,7 @@ layer {
       type: "constant"
       value: 0
     }
-    frozen: true
+    #frozen: true
     momentum: 0.95
   }
 }
@@ -3892,10 +3894,10 @@ layer {
   }
 }
 layer {
-  name: "conv6_nyuv2"
+  name: "conv6_sunrgbd"
   type: "Convolution"
   bottom: "conv5_4"
-  top: "conv6_nyuv2"
+  top: "conv6_sunrgbd"
   param {
     lr_mult: 10
     decay_mult: 1
@@ -3905,7 +3907,7 @@ layer {
     decay_mult: 1
   }
   convolution_param {
-    num_output: 63   # 63 + others
+    num_output: 37
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -3916,62 +3918,35 @@ layer {
 layer {
   name: "conv6_interp"
   type: "Interp"
-  bottom: "conv6_nyuv2"
+  bottom: "conv6_sunrgbd"
   top: "conv6_interp"
   interp_param {
     zoom_factor: 8
   }
 }
 
-# Prob
+# =========================================================
+# Loss & Accuracy
+# =========================================================
 layer {
-  name: "prob"
-  type: "Softmax"
+  name: "loss"
+  type: "SoftmaxWithLoss"
   bottom: "conv6_interp"
-  top: "prob"
+  bottom: "label"
+  loss_param {
+    ignore_label: 255
+  }
+# include: { phase: TRAIN }
 }
-
-# CRF
-# layer {
-#   name: "splitting"
-#   type: "Split"
-#   bottom: "prob"
-#   top: "unary"
-#   top: "Q0"
-# }
-# layer {
-#   name: "crf_inf"
-#   type: "MultiStageMeanfield"
-#   bottom: "unary"
-#   bottom: "Q0"
-#   bottom: "data"
-#   top: "crf_inf"
-#   param { lr_mult: 10000 }
-#   param { lr_mult: 10000 }
-#   param { lr_mult: 1000 }
-#   multi_stage_meanfield_param {
-#     num_iterations: 3
-#     compatibility_mode: POTTS
-# 	threshold: 2
-# 	theta_alpha: 160
-# 	theta_beta: 3
-# 	theta_gamma: 3
-# 	spatial_filter_weights_str: "20"
-# 	bilateral_filter_weights_str: "5"
-#   }
-# }
-
 layer {
-  name: "conv5_3_concat_mat"
-  type: "MatWrite"
-  bottom: "conv5_3_concat"
-  include {
-    phase: TEST
+  name: "accuracy"
+  type: "SegAccuracy"
+  bottom: "conv6_interp"
+  bottom: "label"
+  top: "accuracy"
+  seg_accuracy_param {
+    ignore_label: 255
   }
-  mat_write_param {
-    prefix: "./featdir/"
-# source: "${EXP}/list/${TEST_SET}_id.txt"
-    strip: 0
-    period: 1
-  }
+  include { phase: TEST }
 }
+

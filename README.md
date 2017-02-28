@@ -13,19 +13,19 @@ This code is based on [Deeplab v2](https://bitbucket.org/aquariusjay/deeplab-pub
 
 - How to load source image & label image for training?
 
-	Use python interface as FCN's or deeplab's filelist format. `examples/indoor/image_seg_data_layer.py` maybe help too.
+	Use python interface as FCN's or deeplab's filelist format. `examples/indoor_scene_parsing/image_seg_data_layer.py` maybe help too.
 
 - How to fetch image to segmentation models with any size?
 
-	Ref to FCN's python script. `examples/indoor/predict.py` maybe help too.
+	Ref to FCN's python script. `examples/indoor_scene_parsing/predict.py` maybe help too.
 
 - How to display result pretty?
 
-	`examples/indoor/viz_seg.py` maybe help.
+	`examples/indoor_scene_parsing/viz_seg.py` maybe help.
 
 - How to use CRFasRNN?
 
-	`examples/indoor/test_pspnet50_ade20k64cls_v2.prototxt` is an example. [CRFasRNN's README](https://github.com/torrvision/crfasrnn) may help too, but some differs, 
+	`examples/indoor_scene_parsing/test_pspnet50_ade20k64cls_v2.prototxt` is an example. [CRFasRNN's README](https://github.com/torrvision/crfasrnn) may help too, but some differs, 
 
 	```
 	layer {
