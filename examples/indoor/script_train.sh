@@ -86,3 +86,18 @@ nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 4 ${CAFFE_ROOT}/build/tools/caffe 
 # 		-solver=solver_pspnet50_msv2.prototxt \
 #  		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> ade20k64cls_pspnet50_msv2.trainlog &
 
+
+
+# SUNRGBD
+# nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 5 ${CAFFE_ROOT}/build/tools/caffe train \
+# 		-solver=solver_pspnet50_sunrgbd.prototxt &> sunrgbd_pspnet50.trainlog &
+ 		# -weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> sunrgbd_pspnet50.trainlog &
+
+# nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 5 ${CAFFE_ROOT}/build/tools/caffe train \
+# 		-solver=solver_pspnet50_sunrgbd.prototxt \
+# 	  -snapshot=snapshots/pspnet50-SUNRGBD_iter_100000.solverstate &>> sunrgbd_pspnet50.trainlog &
+
+#nohup /home/hzxiahouzuoxin/usr/bin/mpirun -np 5 ${CAFFE_ROOT}/build/tools/caffe train \
+#		-solver=solver_pspnet50_sunrgb.prototxt \
+#		-weights=./snapshots/pspnet50-SUNRGB-new_iter_160000.caffemodel &> sunrgb_pspnet50_new.trainlog&
+ 		# -weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> sunrgb_pspnet50.trainlog &
