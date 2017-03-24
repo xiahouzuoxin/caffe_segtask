@@ -1,4 +1,9 @@
 
+# To use `image_seg_data_layer`, cd to current path first
+
+```
+export PYTHONPATH=$PYTHONPATH:$PWD/scripts
+```
 
 # Valid Indoor Parsing Datasets
 

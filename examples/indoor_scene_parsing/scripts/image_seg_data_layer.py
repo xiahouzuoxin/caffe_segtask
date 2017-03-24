@@ -18,10 +18,11 @@ class ImageSegDataLayer(caffe.Layer):
 		self.src_list   = params['src_list']
 		self.split      = params['split']
 		self.mean       = np.array(params['mean'])  # BGRD order
+		self.scale      = np.array([1.0/255,1.0/255,1.0/255,1.0/8])  # (x - mean) * scale
 		self.random     = params.get('randomize', False)
 		self.seed       = params.get('seed', None)
 		self.crop       = 473
-		self.batch_size = 1  # real batch_size = self.batch_size * self.argu_n
+		self.batch_size = int(params.get('batch_size',1))  # real batch_size = self.batch_size * self.argu_n
 		self.argu       = DataArgument()
 		# self.argu_types = [self.argu.imresize, self.argu.random_crop]
 		self.argu_types = [self.argu.imresize]
@@ -99,7 +100,7 @@ class ImageSegDataLayer(caffe.Layer):
 		if self.has_depth:
 			im_file, gt_file, dp_file = self.indices[idx].strip().split()
 		else:
-			im_file, gt_file = self.indices[idx].strip().split()
+			im_file, gt_file = self.indices[idx].strip().split()[0:2]
 
 		im = cv2.imread(os.path.join(self.root_dir, im_file), cv2.CV_LOAD_IMAGE_COLOR)
 		gt = cv2.imread(os.path.join(self.root_dir, gt_file), cv2.CV_LOAD_IMAGE_UNCHANGED)
@@ -129,17 +130,18 @@ class ImageSegDataLayer(caffe.Layer):
 		"""
 		if self.has_depth:
 			im, gt, depth = argu_func(im, gt, self.crop, depth)
+			assert(im.shape[0]==depth.shape[0] and im.shape[1]==depth.shape[1])
 		else:
 			im, gt = argu_func(im, gt, self.crop)
 
 		assert(im.shape[0]==gt.shape[0] and im.shape[1]==gt.shape[1] and 
-			   im.shape[0]==depth.shape[0] and im.shape[1]==depth.shape[1] and
 			   im.shape[0]==self.crop and im.shape[1]==self.crop)
 
 		if (im.ndim == 2):
 			im = np.repeat(im[:,:,None], 3, axis=2)
 		# im = im[:,:,::-1]   # Already BGR order using opencv's imread
 		im -= self.mean[0:3]
+		im *= self.scale[0:3]
 		im = im.transpose((2,0,1))
 
 		gt = np.array(gt, dtype=np.uint8)
@@ -148,6 +150,7 @@ class ImageSegDataLayer(caffe.Layer):
 
 		if self.has_depth:
 			depth -= self.mean[3]
+			depth *= self.scale[3]
 			depth = depth[np.newaxis,...]
 			return im, gt, depth
 		else:

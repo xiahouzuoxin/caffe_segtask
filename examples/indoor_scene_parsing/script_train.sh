@@ -84,8 +84,8 @@ CAFFE_ROOT=/mnt/disk/0/hzxiahouzuoxin/deeplab-public-ver2/
 #  Trainning PSPNet50 on SUNRGBD with depth (37 classes)
 # ----------------------------------------------------------------------------------------------
 nohup ${CAFFE_ROOT}/build/tools/caffe.bin train -gpu=1 \
-		-solver=solver_pspnet50_sunrgbd.prototxt &> sunrgbd_pspnet50.trainlog &
-		# -weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> sunrgbd_pspnet50.trainlog &
+		-solver=solver_pspnet50_sunrgbd.prototxt \
+		-weights=../../models/PSPNet/pspnet50_ADE20K.caffemodel &> sunrgbd_pspnet50.trainlog &
 
 
 

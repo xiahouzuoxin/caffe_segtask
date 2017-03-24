@@ -48,7 +48,8 @@ def predict(args):
 		img = cv2.imread(img_path)
 		img = cv2.resize(img, (473, 473))
 
-		in_ = img.copy()[:,:,::-1].astype(float)
+		# in_ = img.copy()[:,:,::-1].astype(float)
+		in_ = img.astype(float) # already BGR order
 		in_ -= np.array([104.008,116.669,122.675])
 		in_ = in_.transpose((2,0,1))
 

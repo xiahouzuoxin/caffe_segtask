@@ -1,0 +1,27 @@
+train_net: "googlenet.prototxt"
+
+# test_iter: 3000
+# test_interval: 10000
+# test_initialization: false
+
+display: 50
+average_loss: 10
+
+lr_policy: "fixed"
+# lr_policy: "step"
+base_lr: 0.01
+weight_decay: 0.0005
+gamma: 0.1
+stepsize: 10000
+# high momentum
+momentum: 0.99
+# no gradient accumulation
+# iter_size: 1
+
+max_iter: 1000000
+snapshot: 30000
+
+# snapshot_prefix: "zygame_ver_prob"
+snapshot_prefix: "zygame_ver_prob_v2"
+
+solver_mode: GPU
